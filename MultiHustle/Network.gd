@@ -3,6 +3,9 @@ extends "res://Network.gd"
 # This is a global variable for a manager
 var multihustle_action_button_manager
 
+# This was used in original code, I'll roll with it
+var steam_oppChars_all = {}
+
 func _ready():
 	connect("player_list_changed", self, "dump_charloader_data_to_cache", [], CONNECT_DEFERRED)
 	multihustle_action_button_manager = preload("res://MultiHustle/ActionButtonManager.gd").new()

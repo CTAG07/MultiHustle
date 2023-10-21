@@ -57,12 +57,12 @@ func _setup_game_vs_group(OPPONENT_IDS):
 			PLAYER_SIDE = index
 			Steam.setLobbyMemberData(SteamLobby.LOBBY_ID, "player_id", str(index))
 			break
-	emit_signal("start_game")
+	rpc_("open_chara_select")
 	Steam.setLobbyMemberData(LOBBY_ID, "status", "fighting")
 	Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", str(OPPONENT_ID))
 
 # All RPCs go to everyone
-func rpc_(function_name, arg):
+func rpc_(function_name:String, arg = null):
 	if OPPONENT_ID != 0:
 		var data = {
 			"rpc_data":{
