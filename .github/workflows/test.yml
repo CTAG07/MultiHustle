@@ -10,13 +10,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        token: ${{ secrets.GIT_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Zip folder
       run: zip -r MultiHustle.zip MultiHustle/
     - name: Create release
       uses: elgohr/Github-Release-Action@v5
-      env:
-        GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
