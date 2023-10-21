@@ -27,7 +27,7 @@ jobs:
     - name: Increment release version
       id: increment_version
       run: | 
-       NEW_VERSION_NUMBER=LATEST_VERSION + 1
+       NEW_VERSION_NUMBER=$((LATEST_VERSION + 1))
        echo "NEW_VERSION_NUMBER=${NEW_VERSION_NUMBER}"
     - name: Create release
       id: create_release
