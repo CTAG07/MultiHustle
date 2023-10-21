@@ -26,10 +26,8 @@ jobs:
           console.log(`LATEST_VERSION=${LATEST_VERSION.data.tag_name}`);
     - name: Increment release version
       id: increment_version
-      run: |
-        VERSION_NUMBER=$(echo "${{ steps.get_latest_version.outputs.LATEST_VERSION }}" | sed 's/^v//')
-        NEW_VERSION_NUMBER=$((VERSION_NUMBER + 1))
-        echo "NEW_VERSION_NUMBER=v${NEW_VERSION_NUMBER}"
+      run: | 
+       NEW_VERSION_NUMBER=$(echo ${LATEST_VERSION} | sed 's/v\([0-9]*\)/v\1+1/')
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
