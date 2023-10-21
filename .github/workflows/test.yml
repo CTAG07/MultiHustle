@@ -15,6 +15,8 @@ jobs:
       run: zip -r MultiHustle.zip MultiHustle/
     - name: Create release
       uses: elgohr/Github-Release-Action@v5
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         title: ${{ github.ref }}
     - name: Upload release asset
