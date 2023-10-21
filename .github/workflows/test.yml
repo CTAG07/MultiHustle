@@ -9,12 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Zip folder
       run: zip -r MultiHustle.zip MultiHustle/
     - name: Create release
       uses: actions/create-release@v1
       with:
-        tag: ${{ github.ref }}
+        tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
