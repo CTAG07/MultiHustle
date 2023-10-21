@@ -1,0 +1,25 @@
+name: Create and publish release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Zip folder
+      run: zip -r MultiHustle.zip MultiHustle/
+    - name: Create release
+      uses: actions/create-release@v1
+      with:
+        tag: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.release.upload_url }}
+        asset_path: ./MultiHustle.zip
+        asset_name: MultiHustle.zip
+        asset_content_type: application/zip
