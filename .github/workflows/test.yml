@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GIT_TOKEN }}
     - name: Zip folder
       run: zip -r MultiHustle.zip MultiHustle/
     - name: Create release
