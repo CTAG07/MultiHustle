@@ -32,3 +32,4 @@ jobs:
        token: ${{ secrets.GIT_TOKEN }}
        tag: v${{ steps.increment_version.outputs.NEW_VERSION_NUMBER }}
        artifacts: ./MultiHustle.zip
+       makeLatest: true
