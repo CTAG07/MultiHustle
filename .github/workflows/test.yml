@@ -12,17 +12,20 @@ jobs:
       with:
         token: ${{ secrets.GIT_TOKEN }}
     - name: Zip folder
+      id: zip_folder
       run: zip -r MultiHustle.zip MultiHustle/
     - name: Create release
+      id: create_release
       uses: elgohr/Github-Release-Action@v5
       env:
         GH_TOKEN: ${{ secrets.GIT_TOKEN }}
       with:
         title: ${{ github.ref }}
     - name: Upload release asset
+      id: upload_release_asset
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ github.release.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./MultiHustle.zip
         asset_name: MultiHustle.zip
         asset_content_type: application/zip
