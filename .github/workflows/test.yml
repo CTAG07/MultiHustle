@@ -20,6 +20,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GIT_TOKEN }}
-        tag: v$(cat version.txt)
+        tag: v$(echo $(cat version.txt) | tr '_' '.')
         artifacts: ./MultiHustle.zip
         makeLatest: true
