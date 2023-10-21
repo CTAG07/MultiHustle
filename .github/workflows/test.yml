@@ -12,10 +12,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         token: ${{ secrets.GIT_TOKEN }}
-    - name: Get version
-      run: |
-       echo "$(cat version.txt)" >> $GITHUB_ENV
-       echo "Version: ${{ env.VERSION }}"
     - name: Zip folder
       id: zip_folder
       run: zip -r MultiHustle.zip MultiHustle/
@@ -24,6 +20,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GIT_TOKEN }}
-        tag: v${{ env.VERSION }}
+        tag: v$(cat version.txt)
         artifacts: ./MultiHustle.zip
         makeLatest: true
