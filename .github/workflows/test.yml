@@ -2,7 +2,8 @@ name: Create and publish release
 
 on:
   push:
-    branches: [ main ]
+    paths:
+      - 'version.txt'
 
 jobs:
   build-and-release:
@@ -11,29 +12,18 @@ jobs:
     - uses: actions/checkout@v2
       with:
         token: ${{ secrets.GIT_TOKEN }}
+    - name: Get version
+      run: |
+       echo "$(cat version.txt)" >> $GITHUB_ENV
+       echo "Version: ${{ env.VERSION }}"
     - name: Zip folder
       id: zip_folder
       run: zip -r MultiHustle.zip MultiHustle/
-    - name: Get latest release version
-      id: get_latest_version
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const LATEST_VERSION = await github.rest.repos.getLatestRelease({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-          });
-          console.log(`LATEST_VERSION=${Number(LATEST_VERSION.data.tag_name)}`);
-    - name: Increment release version
-      id: increment_version
-      run: | 
-       NEW_VERSION_NUMBER=$((LATEST_VERSION + 1))
-       echo "NEW_VERSION_NUMBER=${NEW_VERSION_NUMBER}"
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GIT_TOKEN }}
-        tag: ${{ steps.increment_version.outputs.NEW_VERSION_NUMBER }}
+        tag: v${{ env.VERSION }}
         artifacts: ./MultiHustle.zip
         makeLatest: true
