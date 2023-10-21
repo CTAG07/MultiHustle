@@ -27,7 +27,8 @@ jobs:
     - name: Increment release version
       id: increment_version
       run: | 
-       NEW_VERSION_NUMBER=$(echo ${LATEST_VERSION} | sed 's/v\([0-9]*\)/v\1+1/')
+       NEW_VERSION_NUMBER=$(echo ${LATEST_VERSION} | sed 's/v\([0-9]*\)/v\1+1/');
+       console.log('NEW_VERSION_NUMBER=${NEW_VERSION_NUMBER}')
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
