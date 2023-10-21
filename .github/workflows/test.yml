@@ -18,6 +18,7 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
+        token: ${{ secrets.GIT_TOKEN }}
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       with:
