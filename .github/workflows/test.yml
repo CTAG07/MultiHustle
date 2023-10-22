@@ -15,6 +15,8 @@ jobs:
     - name: Zip folder
       id: zip_folder
       run: zip -r MultiHustle.zip MultiHustle/
+    - name: Create tag
+      run: git tag -a v$(echo $(cat version.txt) | tr '.' '_') && git push origin v$(echo $(cat version.txt) | tr '.' '_')
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
@@ -23,4 +25,3 @@ jobs:
         tag: v$(echo $(cat version.txt) | tr '.' '_')
         artifacts: ./MultiHustle.zip
         makeLatest: true
-        commit: main
