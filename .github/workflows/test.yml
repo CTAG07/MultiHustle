@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    env:
+      tag: v$(cat version.txt)
     steps:
     - uses: actions/checkout@v2
       with:
@@ -19,12 +21,12 @@ jobs:
       uses: tvdias/github-tagger@v0.0.1
       with:
         repo-token: ${{ secrets.GIT_TOKEN }}
-        tag: ${{ format('v{0}', $(shell cat version.txt)) }}
+        tag: $tag
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GIT_TOKEN }}
-        tag: v$(cat version.txt)
+        tag: $tag
         artifacts: ./MultiHustle.zip
         makeLatest: true
