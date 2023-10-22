@@ -15,7 +15,7 @@ func installExtension(childScriptPath:String):
 
 func _init(modLoader = ModLoader):
 	var meta_data = get_meta_data(modLoader, "MultiHustle")
-	logger.mh_log("[MultiHustle] Initializing MultiHustle version %s" % meta_data.version)
+	logger.mh_log("[MultiHustle] Initializing MultiHustle version %s" % meta_data.version, true)
 	modLoader.installScriptExtension("res://MultiHustle/MLMainHook.gd")
 	modLoader.installScriptExtension("res://MultiHustle/main_fake.gd")
 	modLoader.installScriptExtension("res://MultiHustle/mechanics/Hitbox.gd")
