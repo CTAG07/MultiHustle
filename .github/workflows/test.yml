@@ -23,3 +23,4 @@ jobs:
         tag: v$(echo $(cat version.txt) | tr '.' '_')
         artifacts: ./MultiHustle.zip
         makeLatest: true
+        commit: main
