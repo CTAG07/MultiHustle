@@ -50,6 +50,7 @@ func multihustle_start():
 
 func send_sync(OPPONENT_IDS):
 	logger.mh_log("send_sync called")
+	logger.mh_log("opponent ids: " + str(OPPONENT_IDS))
 	OPPONENT_ID = LOBBY_OWNER
 	self.OPPONENT_IDS = OPPONENT_IDS
 	for steam_id in sync_confirms.keys():
@@ -62,13 +63,13 @@ func send_sync(OPPONENT_IDS):
 	is_syncing = true
 	var data = {
 		"steam_id":SteamHustle.STEAM_ID,
-		"sync_confirm":null
+		"sync_confirm":true
 	}
 	_send_P2P_Packet(0, data)
 
-func sync_confirm(sender):
+func sync_confirm(steam_id):
 	logger.mh_log("sync_confirm called")
-	sync_confirms[sender] = true
+	sync_confirms[steam_id] = true
 	if is_syncing:
 		for confirmation in sync_confirms.values():
 			if !confirmation:
@@ -79,7 +80,7 @@ func sync_confirm(sender):
 
 func _setup_game_vs_group(OPPONENT_IDS):
 	logger.mh_log("_setup_game_vs_group called")
-	logger.mh_log("opponent ids: "str(OPPONENT_IDS))
+	logger.mh_log("opponent ids: " + str(OPPONENT_IDS))
 	if Network.has_char_loader():
 		Network.set_shared_characters()
 	SETTINGS_LOCKED = true
@@ -120,5 +121,5 @@ func _read_P2P_Packet_custom(readable):
 	if readable.has("multihustle_start"):
 		send_sync(readable.multihustle_start)
 	if readable.has("sync_confirm"):
-		sync_confirm(sender)
+		sync_confirm(readable.steam_id)
 
