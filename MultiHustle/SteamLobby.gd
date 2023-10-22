@@ -35,21 +35,21 @@ func host_game_vs_all():
 			Steam.closeP2PSessionWithUser(steam_id)
 	Network.multiplayer_host = true
 	#PLAYER_SIDE = 1
-	#multihustle_send_start()
+	#multihustle_start()
 	# DEBUG Stuff
-	multihustle_send_start()
+	multihustle_start()
 
-func multihustle_send_start():
-	logger.mh_log("multihustle_send_start called")
+func multihustle_start():
+	logger.mh_log("multihustle_start called")
 	OPPONENT_ID = LOBBY_OWNER
 	var data = {
 		"multihustle_start":OPPONENT_IDS,
 	}
 	_send_P2P_Packet(0, data)
-	multihustle_send_sync(OPPONENT_IDS)
+	send_sync(OPPONENT_IDS)
 
-func multihustle_send_sync(OPPONENT_IDS):
-	logger.mh_log("multihustle_send_sync called")
+func send_sync(OPPONENT_IDS):
+	logger.mh_log("send_sync called")
 	OPPONENT_ID = LOBBY_OWNER
 	self.OPPONENT_IDS = OPPONENT_IDS
 	for steam_id in sync_confirms.keys():
@@ -62,17 +62,12 @@ func multihustle_send_sync(OPPONENT_IDS):
 	is_syncing = true
 	var data = {
 		"steam_id":SteamHustle.STEAM_ID,
-		#"char_loader_data":null
-		"character_list":null
+		"sync_confirm":null
 	}
-	if Network.has_char_loader():
-		#data["char_loader_data"] = [Network.normal_mods, Network.char_mods, Network.hash_to_folder]
-		data["character_list"] = Network.char_mods
 	_send_P2P_Packet(0, data)
 
-func multihustle_receive_sync(sender, character_list):
-	logger.mh_log("multihustle_receive_sync called")
-	Network.steam_oppChars_all[sender] = character_list
+func sync_confirm(sender):
+	logger.mh_log("sync_confirm called")
 	sync_confirms[sender] = true
 	if is_syncing:
 		for confirmation in sync_confirms.values():
@@ -84,20 +79,15 @@ func multihustle_receive_sync(sender, character_list):
 
 func _setup_game_vs_group(OPPONENT_IDS):
 	logger.mh_log("_setup_game_vs_group called")
+	logger.mh_log("opponent ids: "str(OPPONENT_IDS))
 	if Network.has_char_loader():
 		Network.set_shared_characters()
 	SETTINGS_LOCKED = true
 	self.OPPONENT_IDS = OPPONENT_IDS
 	Network.char_loaded.clear()
 	for steam_id in OPPONENT_IDS.values():
-		Network.register_player_steam(steam_id)
-		if steam_id == SteamHustle.STEAM_ID:
-			if Network.has_char_loader():
-				Network.player_chars[steam_id] = Network.steam_oppChars
-		else:
-			Network.char_loaded[steam_id] = false
+		Network.char_loaded[steam_id] = false
 	for index in OPPONENT_IDS.keys():
-		Network.char_loaded[index] = false
 		var steam_id = OPPONENT_IDS[index]
 		if steam_id == SteamHustle.STEAM_ID:
 			PLAYER_SIDE = index
@@ -128,7 +118,7 @@ func _read_P2P_Packet_custom(readable):
 				Network.char_loaded[sender] = true
 	._read_P2P_Packet_custom(readable)
 	if readable.has("multihustle_start"):
-		multihustle_send_sync(readable.multihustle_start)
-	if readable.has("character_list"):
-		multihustle_receive_sync(sender, readable.character_list)
+		send_sync(readable.multihustle_start)
+	if readable.has("sync_confirm"):
+		sync_confirm(sender)
 
