@@ -12,6 +12,7 @@ func _setup_game_vs(steam_id):
 	host_game_vs_all()
 
 func host_game_vs_all():
+	print("[Multihustle] host_game_vs_all called")
 	if SteamHustle.STEAM_ID != LOBBY_OWNER:
 		print("[MultiHustle] Only host can setup")
 		return
@@ -36,10 +37,53 @@ func host_game_vs_all():
 	# DEBUG Stuff
 	multihustle_send_start()
 
+func multihustle_send_start():
+	print("[Multihustle] multihustle_send_start called")
+	OPPONENT_ID = LOBBY_OWNER
+	var data = {
+		"multihustle_start":OPPONENT_IDS,
+	}
+	_send_P2P_Packet(0, data)
+	multihustle_send_sync(OPPONENT_IDS)
+
+func multihustle_send_sync(OPPONENT_IDS):
+	print("[Multihustle] multihustle_send_sync called")
+	OPPONENT_ID = LOBBY_OWNER
+	self.OPPONENT_IDS = OPPONENT_IDS
+	for steam_id in sync_confirms.keys():
+		if !OPPONENT_IDS.values().has(steam_id):
+			sync_confirms.erase(steam_id)
+	for steam_id in OPPONENT_IDS.values():
+		if !sync_confirms.has(steam_id):
+			sync_confirms[steam_id] = false
+	sync_confirms[SteamHustle.STEAM_ID] = true
+	is_syncing = true
+	var data = {
+		"steam_id":SteamHustle.STEAM_ID,
+		#"char_loader_data":null
+		"character_list":null
+	}
+	if Network.has_char_loader():
+		#data["char_loader_data"] = [Network.normal_mods, Network.char_mods, Network.hash_to_folder]
+		data["character_list"] = Network.char_mods
+	_send_P2P_Packet(0, data)
+
+func multihustle_receive_sync(sender, character_list):
+	print("[Multihustle] multihustle_receive_sync called")
+	Network.steam_oppChars_all[sender] = character_list
+	sync_confirms[sender] = true
+	if is_syncing:
+		for confirmation in sync_confirms.values():
+			if !confirmation:
+				return
+		is_syncing = false
+		sync_confirms.clear()
+		_setup_game_vs_group(OPPONENT_IDS)
+
 func _setup_game_vs_group(OPPONENT_IDS):
+	print("[Multihustle] _setup_game_vs_group called")
 	if Network.has_char_loader():
 		Network.set_shared_characters()
-	print("[MultiHustle] starting match")
 	SETTINGS_LOCKED = true
 	self.OPPONENT_IDS = OPPONENT_IDS
 	Network.char_loaded.clear()
@@ -85,42 +129,3 @@ func _read_P2P_Packet_custom(readable):
 	if readable.has("character_list"):
 		multihustle_receive_sync(sender, readable.character_list)
 
-func multihustle_send_start():
-	OPPONENT_ID = LOBBY_OWNER
-	var data = {
-		"multihustle_start":OPPONENT_IDS,
-	}
-	_send_P2P_Packet(0, data)
-	multihustle_send_sync(OPPONENT_IDS)
-
-func multihustle_send_sync(OPPONENT_IDS):
-	OPPONENT_ID = LOBBY_OWNER
-	self.OPPONENT_IDS = OPPONENT_IDS
-	for steam_id in sync_confirms.keys():
-		if !OPPONENT_IDS.values().has(steam_id):
-			sync_confirms.erase(steam_id)
-	for steam_id in OPPONENT_IDS.values():
-		if !sync_confirms.has(steam_id):
-			sync_confirms[steam_id] = false
-	sync_confirms[SteamHustle.STEAM_ID] = true
-	is_syncing = true
-	var data = {
-		"steam_id":SteamHustle.STEAM_ID,
-		#"char_loader_data":null
-		"character_list":null
-	}
-	if Network.has_char_loader():
-		#data["char_loader_data"] = [Network.normal_mods, Network.char_mods, Network.hash_to_folder]
-		data["character_list"] = Network.char_mods
-	_send_P2P_Packet(0, data)
-
-func multihustle_receive_sync(sender, character_list):
-	Network.steam_oppChars_all[sender] = character_list
-	sync_confirms[sender] = true
-	if is_syncing:
-		for confirmation in sync_confirms.values():
-			if !confirmation:
-				return
-		is_syncing = false
-		sync_confirms.clear()
-		_setup_game_vs_group(OPPONENT_IDS)
