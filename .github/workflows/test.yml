@@ -19,7 +19,7 @@ jobs:
       uses: tvdias/github-tagger@v0.0.1
       with:
         repo-token: ${{ secrets.GIT_TOKEN }}
-        tag: v$(cat version.txt)
+        tag: v$(shell cat version.txt)
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
