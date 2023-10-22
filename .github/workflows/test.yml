@@ -16,12 +16,12 @@ jobs:
       id: zip_folder
       run: zip -r MultiHustle.zip MultiHustle/
     - name: Create tag
-      run: git tag -a v$(echo $(cat version.txt) | tr '.' '_') && git push origin v$(echo $(cat version.txt) | tr '.' '_')
+      run: git tag -a v$(cat version.txt) && git push origin v$(cat version.txt)
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1
       with:
         token: ${{ secrets.GIT_TOKEN }}
-        tag: v$(echo $(cat version.txt) | tr '.' '_')
+        tag: v$(cat version.txt)
         artifacts: ./MultiHustle.zip
         makeLatest: true
