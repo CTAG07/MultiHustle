@@ -8,14 +8,14 @@ var sync_confirms = {}
 signal start_game()
 
 func _setup_game_vs(steam_id):
-	print_debug("Normal game setup got called for some reason")
+	print_debug("[MultiHustle] Normal game setup got called for some reason")
 	host_game_vs_all()
 
 func host_game_vs_all():
 	if SteamHustle.STEAM_ID != LOBBY_OWNER:
-		print("Only host can setup")
+		print("[MultiHustle] Only host can setup")
 		return
-	print("registering players")
+	print("[MultiHustle] registering players")
 	REMATCHING_ID = 0
 	OPPONENT_IDS.clear()
 	OPPONENT_IDS[1] = SteamHustle.STEAM_ID
@@ -39,7 +39,7 @@ func host_game_vs_all():
 func _setup_game_vs_group(OPPONENT_IDS):
 	if Network.has_char_loader():
 		Network.set_shared_characters()
-	print("starting match")
+	print("[MultiHustle] starting match")
 	SETTINGS_LOCKED = true
 	self.OPPONENT_IDS = OPPONENT_IDS
 	Network.char_loaded.clear()
@@ -70,7 +70,7 @@ func rpc_(function_name:String, arg = null):
 				"arg":arg
 			}
 		}
-		print("sending rpc through steam...")
+		print("[MultiHustle] sending rpc through steam...")
 		_send_P2P_Packet(0, data)
 
 func _read_P2P_Packet_custom(readable):

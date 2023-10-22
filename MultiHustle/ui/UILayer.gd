@@ -26,7 +26,7 @@ func sync_timer(player_id):
 	if Network.multiplayer_active:
 		player_id = GetRealID(player_id)
 		if player_id == Network.player_id:
-			print("syncing timer")
+			print("[MultiHustle] syncing timer")
 			var timer
 			match(player_id):
 				1:

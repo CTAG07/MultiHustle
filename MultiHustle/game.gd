@@ -875,7 +875,7 @@ func MH_wrapped_hit(hitbox, target):
 		result = hitbox.hit(target)
 		target.opponent = opponentTemp
 	else:
-		print_debug("MultiHustle: Couldn't set opponent for hitbox")
+		print_debug("[MultiHustle] Couldn't set opponent for hitbox")
 		result = hitbox.hit(target)
 	return result
 

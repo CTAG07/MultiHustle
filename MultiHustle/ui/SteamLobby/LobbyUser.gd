@@ -13,6 +13,7 @@ func init(member):
 		if button.is_connected("pressed", self, "on_challenge_pressed"):
 			button.disconnect("pressed", self, "on_challenge_pressed")
 			button.connect("pressed", self, "on_start_game_pressed")
+			print("[MultiHustle] Start game button signal connected")
 
 func on_start_game_pressed():
 	emit_signal("start_game_pressed")

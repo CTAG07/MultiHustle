@@ -9,7 +9,7 @@ func get_extra()->Dictionary:
 		extra.merge(.get_extra())
 		return extra
 	else:
-		print_debug("MH Extra: game was somehow null")
+		print_debug("[MultiHustle] game was somehow null")
 		return .get_extra()
 
 func GetRealID():
@@ -145,7 +145,7 @@ func activate(refresh = true):
 	fighter.any_available_actions = any_available_actions
 	if user_facing and $"%AutoButton".pressed:
 		if not any_available_actions:
-			print("no available actions!")
+			print("[MultiHustle] no available actions!")
 			on_action_submitted("Continue", null)
 			current_action = "Continue"
 
