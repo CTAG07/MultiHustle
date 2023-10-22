@@ -103,6 +103,7 @@ func _setup_game_vs_group(OPPONENT_IDS):
 			PLAYER_SIDE = index
 			Steam.setLobbyMemberData(SteamLobby.LOBBY_ID, "player_id", str(index))
 			break
+	logger.mh_log("made it to character select")
 	rpc_("open_chara_select")
 	Steam.setLobbyMemberData(LOBBY_ID, "status", "fighting")
 	Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", str(OPPONENT_ID))
