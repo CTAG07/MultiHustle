@@ -7,16 +7,18 @@ var sync_confirms = {}
 
 signal start_game()
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func _setup_game_vs(steam_id):
-	print_debug("[MultiHustle] Normal game setup got called for some reason")
+	logger.mh_log("Normal game setup got called for some reason")
 	host_game_vs_all()
 
 func host_game_vs_all():
-	print("[Multihustle] host_game_vs_all called")
+	logger.mh_log("host_game_vs_all called")
 	if SteamHustle.STEAM_ID != LOBBY_OWNER:
-		print("[MultiHustle] Only host can setup")
+		logger.mh_log("Only host can setup")
 		return
-	print("[MultiHustle] registering players")
+	logger.mh_log("registering players")
 	REMATCHING_ID = 0
 	OPPONENT_IDS.clear()
 	OPPONENT_IDS[1] = SteamHustle.STEAM_ID
@@ -38,7 +40,7 @@ func host_game_vs_all():
 	multihustle_send_start()
 
 func multihustle_send_start():
-	print("[Multihustle] multihustle_send_start called")
+	logger.mh_log("multihustle_send_start called")
 	OPPONENT_ID = LOBBY_OWNER
 	var data = {
 		"multihustle_start":OPPONENT_IDS,
@@ -47,7 +49,7 @@ func multihustle_send_start():
 	multihustle_send_sync(OPPONENT_IDS)
 
 func multihustle_send_sync(OPPONENT_IDS):
-	print("[Multihustle] multihustle_send_sync called")
+	logger.mh_log("multihustle_send_sync called")
 	OPPONENT_ID = LOBBY_OWNER
 	self.OPPONENT_IDS = OPPONENT_IDS
 	for steam_id in sync_confirms.keys():
@@ -69,7 +71,7 @@ func multihustle_send_sync(OPPONENT_IDS):
 	_send_P2P_Packet(0, data)
 
 func multihustle_receive_sync(sender, character_list):
-	print("[Multihustle] multihustle_receive_sync called")
+	logger.mh_log("multihustle_receive_sync called")
 	Network.steam_oppChars_all[sender] = character_list
 	sync_confirms[sender] = true
 	if is_syncing:
@@ -81,7 +83,7 @@ func multihustle_receive_sync(sender, character_list):
 		_setup_game_vs_group(OPPONENT_IDS)
 
 func _setup_game_vs_group(OPPONENT_IDS):
-	print("[Multihustle] _setup_game_vs_group called")
+	logger.mh_log("_setup_game_vs_group called")
 	if Network.has_char_loader():
 		Network.set_shared_characters()
 	SETTINGS_LOCKED = true
@@ -114,7 +116,7 @@ func rpc_(function_name:String, arg = null):
 				"arg":arg
 			}
 		}
-		print("[MultiHustle] sending rpc through steam...")
+		logger.mh_log("sending rpc through steam...")
 		_send_P2P_Packet(0, data)
 
 func _read_P2P_Packet_custom(readable):

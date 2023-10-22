@@ -3,6 +3,8 @@ extends "res://ui/UILayer.gd"
 var multiHustle_UISelectors
 var spacebar_handler
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func _on_game_playback_requested():
 	if Network.multiplayer_active and not ReplayManager.resimulating:
 		$PostGameButtons.show()
@@ -26,7 +28,7 @@ func sync_timer(player_id):
 	if Network.multiplayer_active:
 		player_id = GetRealID(player_id)
 		if player_id == Network.player_id:
-			print("[MultiHustle] syncing timer")
+			logger.mh_log("syncing timer")
 			var timer
 			match(player_id):
 				1:

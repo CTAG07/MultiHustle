@@ -1,8 +1,10 @@
 extends "res://ui/SteamLobby/SteamLobby.gd"
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func init():
 	if SteamLobby.REMATCHING_ID != 0:
-		print("[MultiHustle] MultiHustle doesn't support rematch button yet")
+		logger.mh_log("MultiHustle doesn't support rematch button yet")
 		SteamLobby.REMATCHING_ID = 0
 	.init()
 	$"%MatchList".hide()

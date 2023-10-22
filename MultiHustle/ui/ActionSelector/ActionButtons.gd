@@ -1,5 +1,7 @@
 extends "res://ui/ActionSelector/ActionButtons.gd"
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func get_extra()->Dictionary:
 	if is_instance_valid(game):
 		# I now get opponent first, just to be sure, for some reason.
@@ -9,7 +11,7 @@ func get_extra()->Dictionary:
 		extra.merge(.get_extra())
 		return extra
 	else:
-		print_debug("[MultiHustle] game was somehow null")
+		logger.mh_log("game was somehow null")
 		return .get_extra()
 
 func GetRealID():
@@ -145,7 +147,7 @@ func activate(refresh = true):
 	fighter.any_available_actions = any_available_actions
 	if user_facing and $"%AutoButton".pressed:
 		if not any_available_actions:
-			print("[MultiHustle] no available actions!")
+			logger.mh_log("no available actions!")
 			on_action_submitted("Continue", null)
 			current_action = "Continue"
 

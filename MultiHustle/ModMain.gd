@@ -1,20 +1,21 @@
 extends Node
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func installExtension(childScriptPath:String):
 	var childScript = ResourceLoader.load(childScriptPath)
 	childScript.new()
 	var parentScript = childScript.get_base_script()
 	if parentScript == null:
-		print("[MultiHustle] Missing dependencies")
+		logger.mh_log("[MultiHustle] Missing dependencies")
 
 	var parentScriptPath = parentScript.resource_path
-	print("[MultiHustle] Installing extension from " + childScriptPath + " to " + parentScriptPath)
+	logger.mh_log("[MultiHustle] Installing extension from " + childScriptPath + " to " + parentScriptPath)
 	childScript.take_over_path(parentScriptPath)
 
 func _init(modLoader = ModLoader):
 	var meta_data = get_meta_data(modLoader, "MultiHustle")
-	print("[MultiHustle] Initializing MultiHustle version %s" % meta_data.version)
-
+	logger.mh_log("[MultiHustle] Initializing MultiHustle version %s" % meta_data.version)
 	modLoader.installScriptExtension("res://MultiHustle/MLMainHook.gd")
 	modLoader.installScriptExtension("res://MultiHustle/main_fake.gd")
 	modLoader.installScriptExtension("res://MultiHustle/mechanics/Hitbox.gd")
@@ -34,7 +35,7 @@ func _init(modLoader = ModLoader):
 
 	#modLoader.saveScene(preload("res://MultiHustle/ui/SteamLobby/LobbyMatch.tscn").instance(), "res://ui/SteamLobby/LobbyMatch.tscn")
 
-	print("[MultiHustle] Initialized")
+	logger.mh_log("[MultiHustle] Initialized")
 
 func ensure_save(modLoader, path):
 	var instance = load(path).instance()

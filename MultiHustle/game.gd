@@ -32,6 +32,7 @@ var color_rng:BetterRng = BetterRng.new()
 # Handled this way to avoid constant resizing, assuming Godot isn't stupid
 var throws_consumed:Dictionary = {}
 
+var logger = preload("res://MultiHustle/logger.gd")
 
 func copy_to(game):
 	set_vanilla_game_started(true)
@@ -164,7 +165,7 @@ func start_game(singleplayer:bool, match_data:Dictionary):
 	# Implement variable key loader
 	for index in match_data.selected_characters.keys():
 		if multiHustle_CharManager.InitCharacter(self, index, match_data.selected_characters[index]) == false:
-			print_debug("Failed to load character")
+			logger.mh_log("Failed to load character")
 			return false
 
 	for player in players.values():
@@ -875,7 +876,7 @@ func MH_wrapped_hit(hitbox, target):
 		result = hitbox.hit(target)
 		target.opponent = opponentTemp
 	else:
-		print_debug("[MultiHustle] Couldn't set opponent for hitbox")
+		logger.mh_log("Couldn't set opponent for hitbox")
 		result = hitbox.hit(target)
 	return result
 
