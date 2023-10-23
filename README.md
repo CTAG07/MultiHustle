@@ -7,7 +7,7 @@ Planned changes
 - [x] Make it not crash when pressing start
 - [x] Make pressing start do something
 - [x] Make pressing start lead to character select
-- [ ] Make character select work
+- [x] Make character select work
 - [ ] Make character select lead to game
 - [ ] Make sending moves work
 - [ ] Make syncing things (such as timer) work
