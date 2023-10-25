@@ -11,7 +11,7 @@ Planned changes
 - [x] Make character select lead to game
 - [ ] Make sending moves work
 - [ ] Make syncing things (such as timer) work
-- [ ] Lock p1 to left side of screen
+- [x] Lock p1 to left side of screen
 - [ ] Fix any bugs that come from online
 - [ ] Fix any bugs in base multiplayer
 - [ ] Custom characters support
@@ -24,3 +24,4 @@ Extra changes (Possibilities after planned changes are done)
 - [ ] Mod compatibility
 - [ ] /em support
 - [ ] Anything else wanted
+
