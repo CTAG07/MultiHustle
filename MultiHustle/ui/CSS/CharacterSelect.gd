@@ -1,5 +1,7 @@
 extends "res://ui/CSS/CharacterSelect.gd"
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 var current_player_real = current_player
 var viewing_character = 1
 var real_selected_styles = {}
@@ -12,9 +14,12 @@ func _on_network_character_selected(player_id, character, style = null):
 	selected_styles[player_id] = style
 	if Network.is_host() and player_id == Network.player_id:
 		$"%GameSettingsPanelContainer".hide()
+	logger.mh_log("Player " + str(player_id) + " selected character " + str(character))
+	logger.mh_log("Current characters selected: " + str(selected_characters))
 	for chara in selected_characters.values():
 		if chara == null:
 			return
+	logger.mh_log("All players selected a character, starting game")
 	if Network.is_host():
 		var match_data = get_match_data()
 		Network.rpc_("send_match_data", match_data)

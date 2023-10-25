@@ -17,6 +17,8 @@ var active_buttons_right_index:int
 
 var last_active = {}
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func init_actionbuttons()->void:
 	var has_exclusions = Network.multiplayer_active
 	var left_buttons
@@ -45,8 +47,18 @@ func init_actionbuttons()->void:
 		if !last_active.has(id) or !is_instance_valid(last_active[id]):
 			last_active[id] = action_buttons_right[id]
 
-	set_active_buttons(1, false)
-	set_active_buttons(2, true)
+	if !Network.multiplayer_active:
+		set_active_buttons(1, false)
+		set_active_buttons(2, true)
+	else:
+		set_active_buttons(Network.player_id, false)
+		if Network.player_id != 1:
+			var a = 1
+			set_active_buttons(a, true)
+		else:
+			var a = 2
+			set_active_buttons(a, true)
+
 	# TODO - Replace this with some real logic
 	for buttons in action_buttons_left.values():
 		buttons.opposite_buttons = active_buttons_right
@@ -63,14 +75,13 @@ func setup_buttons(id:int, is_right:bool):
 
 	if !group.has(id):
 		action_buttons = action_buttons_scene.instance()
+		logger.mh_log(str(action_buttons))
 		if !is_right:
-			var new_owner = set_custom_data(action_buttons, custom_data_left)
 			vbox_container_left.add_child(action_buttons)
-			action_buttons.owner = new_owner
+			set_custom_data(action_buttons, custom_data_left)
 		else:
-			var new_owner = set_custom_data(action_buttons, custom_data_right)
 			vbox_container_right.add_child(action_buttons)
-			action_buttons.owner = new_owner
+			set_custom_data(action_buttons, custom_data_right)
 		action_buttons.connect("visibility_changed", bottombar, "_on_action_buttons_visibility_changed")
 		action_buttons.connect("action_clicked", main, "on_action_clicked", [id])
 		group[id] = action_buttons

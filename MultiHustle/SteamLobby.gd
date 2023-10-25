@@ -23,16 +23,19 @@ func host_game_vs_all():
 	OPPONENT_IDS.clear()
 	OPPONENT_IDS[1] = SteamHustle.STEAM_ID
 	var idx = 1
+	logger.mh_log("Lobby members: " + str(LOBBY_MEMBERS))
 	for member in LOBBY_MEMBERS:
-		var steam_id = member.steam_id
-		var status = Steam.getLobbyMemberData(LOBBY_ID, steam_id, "status")
-		#if status == "ready":
-		if status == "idle":
-			OPPONENT_IDS[idx] = steam_id
-			idx += idx + 1
-		else:
-			# I should probably tweak this, but for now it does this
-			Steam.closeP2PSessionWithUser(steam_id)
+		#Exclude ourselves when counting lobby members
+		if member.steam_id != SteamHustle.STEAM_ID:
+			var steam_id = member.steam_id
+			var status = Steam.getLobbyMemberData(LOBBY_ID, steam_id, "status")
+			#if status == "ready":
+			if status == "idle":
+				idx += 1
+				OPPONENT_IDS[idx] = steam_id
+			else:
+				# I should probably tweak this, but for now it does this
+				Steam.closeP2PSessionWithUser(steam_id)
 	Network.multiplayer_host = true
 	#PLAYER_SIDE = 1
 	#multihustle_start()
@@ -81,8 +84,6 @@ func sync_confirm(steam_id):
 func _setup_game_vs_group(OPPONENT_IDS):
 	logger.mh_log("_setup_game_vs_group called")
 	logger.mh_log("opponent ids: " + str(OPPONENT_IDS))
-	if Network.has_char_loader():
-		Network.set_shared_characters()
 	SETTINGS_LOCKED = true
 	self.OPPONENT_IDS = OPPONENT_IDS
 	Network.char_loaded.clear()
@@ -92,10 +93,14 @@ func _setup_game_vs_group(OPPONENT_IDS):
 		var steam_id = OPPONENT_IDS[index]
 		if steam_id == SteamHustle.STEAM_ID:
 			PLAYER_SIDE = index
+			Network.player_id = index
 			Steam.setLobbyMemberData(SteamLobby.LOBBY_ID, "player_id", str(index))
 			break
 	logger.mh_log("made it to character select")
-	rpc_("open_chara_select")
+	Network.network_ids = OPPONENT_IDS
+	if SteamHustle.STEAM_ID == LOBBY_OWNER:
+		rpc_("open_chara_select")
+		Network.callv("open_chara_select", null)
 	Steam.setLobbyMemberData(LOBBY_ID, "status", "fighting")
 	Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", str(OPPONENT_ID))
 
@@ -108,8 +113,22 @@ func rpc_(function_name:String, arg = null):
 				"arg":arg
 			}
 		}
-		logger.mh_log("sending rpc through steam...")
 		_send_P2P_Packet(0, data)
+
+func _receive_rpc(data):
+	print("received steam rpc")
+	var a = false
+	for id in OPPONENT_IDS.values():
+		if id == p2p_packet_sender:
+			a = true
+	if !a:
+		return
+	var args = data.rpc_data.arg
+	if args == null:
+		args = []
+	elif not args is Array:
+		args = [args]
+	Network.callv(data.rpc_data.func , args)
 
 func _read_P2P_Packet_custom(readable):
 	var sender = p2p_packet_sender
@@ -123,3 +142,99 @@ func _read_P2P_Packet_custom(readable):
 	if readable.has("sync_confirm"):
 		sync_confirm(readable.steam_id)
 
+# These are hardly needed, I'm putting these here so that I can log packets recieved and sent for debugging purposes
+func _read_P2P_Packet():
+	var PACKET_SIZE:int = Steam.getAvailableP2PPacketSize(0)
+
+	if PACKET_SIZE > 0:
+		var PACKET:Dictionary = Steam.readP2PPacket(PACKET_SIZE, 0)
+		if PACKET.empty() or PACKET == null:
+			print("WARNING: read an empty packet with non-zero size!")
+		var PACKET_SENDER:int = PACKET["steam_id_remote"]
+		p2p_packet_sender = PACKET_SENDER
+		var PACKET_CODE:PoolByteArray = PACKET["data"]
+		var readable:Dictionary = bytes2var(PACKET_CODE)
+		logger.mh_log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable))
+		if readable.has("rpc_data"):
+			print("received rpc")
+			_receive_rpc(readable)
+		if readable.has("challenge_from"):
+			_receive_challenge(readable.challenge_from, readable.match_settings)
+		if readable.has("challenge_accepted"):
+			if PACKET_SENDER == CHALLENGING_STEAM_ID:
+				_on_opponent_challenge_accepted(readable.challenge_accepted)
+		if readable.has("match_quit"):
+			if PACKET_SENDER == OPPONENT_ID:
+				if Network.rematch_menu:
+					emit_signal("quit_on_rematch")
+					Steam.setLobbyMemberData(LOBBY_ID, "status", "busy")
+				if not is_instance_valid(Global.current_game):
+					get_tree().reload_current_scene()
+				Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", "")
+				Steam.setLobbyMemberData(LOBBY_ID, "character", "")
+				Steam.setLobbyMemberData(LOBBY_ID, "player_id", "")
+		if readable.has("match_settings_updated"):
+			if PACKET_SENDER == LOBBY_OWNER:
+				if SETTINGS_LOCKED:
+					NEW_MATCH_SETTINGS = readable.match_settings_updated
+				else :
+					MATCH_SETTINGS = readable.match_settings_updated
+				emit_signal("received_match_settings", readable.match_settings_updated)
+		if readable.has("player_busy"):
+			pass
+		if readable.has("request_match_settings"):
+			_send_P2P_Packet(readable.request_match_settings, {"match_settings_updated":MATCH_SETTINGS})
+		if readable.has("message"):
+			if readable.message == "handshake":
+				emit_signal("handshake_made")
+		
+		if readable.has("challenge_cancelled"):
+			if PACKET_SENDER == CHALLENGER_STEAM_ID:
+				emit_signal("challenger_cancelled")
+				CHALLENGER_STEAM_ID = 0
+		if readable.has("challenge_declined"):
+			_on_challenge_declined(readable.challenge_declined)
+		if readable.has("spectate_accept"):
+			if PACKET_SENDER == REQUESTING_TO_SPECTATE:
+				REQUESTING_TO_SPECTATE = 0
+				_on_spectate_request_accepted(readable)
+		if readable.has("spectator_replay_update"):
+			if PACKET_SENDER == SPECTATING_ID:
+				_on_received_spectator_replay(readable.spectator_replay_update)
+		if readable.has("request_spectate"):
+			_on_received_spectate_request(readable.request_spectate)
+		if readable.has("spectate_ended"):
+			_remove_spectator(readable.spectate_ended)
+		if readable.has("spectate_declined"):
+			if PACKET_SENDER == REQUESTING_TO_SPECTATE:
+				REQUESTING_TO_SPECTATE = 0
+				_on_spectate_declined()
+		if readable.has("spectator_sync_timers"):
+			if PACKET_SENDER == SPECTATING_ID:
+				_on_spectate_sync_timers(readable.spectator_sync_timers)
+		if readable.has("spectator_turn_ready"):
+			if PACKET_SENDER == SPECTATING_ID:
+				_on_spectate_turn_ready(readable.spectator_turn_ready)
+		if readable.has("spectator_tick_update"):
+			if PACKET_SENDER == SPECTATING_ID:
+				_on_spectate_tick_update(readable.spectator_tick_update)
+		if readable.has("spectator_player_forfeit"):
+			if PACKET_SENDER == SPECTATING_ID:
+				Network.player_forfeit(readable.spectator_player_forfeit)
+		if readable.has("validate_auth_session"):
+			_validate_Auth_Session(readable.validate_auth_session, PACKET_SENDER)
+		_read_P2P_Packet_custom(readable)
+
+func _send_P2P_Packet(target:int, packet_data:Dictionary)->void :
+	logger.mh_log("Sending P2P packet! Data: " + str(packet_data))
+	var SEND_TYPE:int = Steam.P2P_SEND_RELIABLE
+	var CHANNEL:int = 0
+	var DATA:PoolByteArray
+	DATA.append_array(var2bytes(packet_data))
+	if target == 0:
+		if LOBBY_MEMBERS.size() > 1:
+			for MEMBER in LOBBY_MEMBERS:
+				if MEMBER.steam_id != SteamHustle.STEAM_ID:
+					Steam.sendP2PPacket(MEMBER.steam_id, DATA, SEND_TYPE, CHANNEL)
+	else :
+		Steam.sendP2PPacket(target, DATA, SEND_TYPE, CHANNEL)
