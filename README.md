@@ -8,7 +8,7 @@ Planned changes
 - [x] Make pressing start do something
 - [x] Make pressing start lead to character select
 - [x] Make character select work
-- [ ] Make character select lead to game
+- [x] Make character select lead to game
 - [ ] Make sending moves work
 - [ ] Make syncing things (such as timer) work
 - [ ] Lock p1 to left side of screen
