@@ -75,7 +75,6 @@ func setup_buttons(id:int, is_right:bool):
 
 	if !group.has(id):
 		action_buttons = action_buttons_scene.instance()
-		logger.mh_log(str(action_buttons))
 		if !is_right:
 			vbox_container_left.add_child(action_buttons)
 			set_custom_data(action_buttons, custom_data_left)
