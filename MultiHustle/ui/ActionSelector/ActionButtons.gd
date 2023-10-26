@@ -2,6 +2,73 @@ extends "res://ui/ActionSelector/ActionButtons.gd"
 
 var logger = preload("res://MultiHustle/logger.gd")
 
+# Hooked for debugging purposes
+func init(game, id):
+	logger.mh_log("Init called for action buttons! Game: " + str(game) + " ID: " + str(id))
+	reset()
+	self.game = game
+	fighter = game.get_player(id)
+	$"%DI".visible = fighter.di_enabled
+	fighter_extra = fighter.player_extra_params_scene.instance()
+	fighter_extra.connect("data_changed", self, "extra_updated")
+	game.connect("forfeit_started", self, "_on_forfeit_started")
+	fighter_extra.set_fighter(fighter)
+	turbo_mode = fighter.turbo_mode
+	Network.action_button_panels[id] = self
+	buttons = []
+
+
+	var states = []
+	for category in fighter.action_cancels:
+		for state in fighter.action_cancels[category]:
+			if state.show_in_menu and not state in states:
+				states.append(state)
+				create_button(state.name, state.title, state.get_ui_category(), state.data_ui_scene, BUTTON_SCENE, state.button_texture, state.reversible, state.flip_icon, state)
+
+	sort_categories()
+	connect("action_selected", fighter, "on_action_selected")
+	fighter.connect("action_selected", self, "_on_fighter_action_selected")
+	fighter.connect("forfeit", self, "_on_fighter_forfeit")
+	hide()
+	$"%TopRowDataContainer".add_child(fighter_extra)
+	if player_id == 1:
+
+
+		$"%CategoryContainer".move_child($"%TurnButtons", $"%CategoryContainer".get_children().size() - 1)
+		$"%TopRowDataContainer".move_child(fighter_extra, 2)
+	else :
+		$"%TopRowDataContainer".move_child(fighter_extra, 0)
+	continue_button = create_button("Continue", "Hold", "Movement", null, preload("res://ui/ActionSelector/ContinueButton.tscn"), null, false)
+	continue_button.get_parent().remove_child(continue_button)
+	continue_button["custom_fonts/font"] = null
+	$"%TurnButtons".add_child(continue_button)
+	$"%TurnButtons".move_child(continue_button, 1)
+
+	logger.mh_log("Init finished for action buttons! Game: " + str(game) + " ID: " + str(id))
+
+func reset():
+	for button_category_container in button_category_containers.values():
+		button_category_container.free()
+	for button in buttons:
+		if is_instance_valid(button):
+			if button.data_node:
+				button.data_node.free()
+			button.free()
+	for data in $"%DataContainer".get_children():
+		data.free()
+	if fighter_extra:
+		fighter_extra.free()
+	
+	button_category_containers.clear()
+
+
+
+	current_action = null
+	current_button = null
+	last_button = null
+	forfeit = false
+	buttons = []
+
 func get_extra()->Dictionary:
 	if is_instance_valid(game):
 		# I now get opponent first, just to be sure, for some reason.

@@ -62,6 +62,7 @@ func send_sync(OPPONENT_IDS):
 	for steam_id in OPPONENT_IDS.values():
 		if !sync_confirms.has(steam_id):
 			sync_confirms[steam_id] = false
+		Network.register_player_steam(steam_id)
 	sync_confirms[SteamHustle.STEAM_ID] = true
 	is_syncing = true
 	var data = {

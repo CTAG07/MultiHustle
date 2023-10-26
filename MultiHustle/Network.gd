@@ -6,7 +6,6 @@ var multihustle_action_button_manager
 var char_loaded = {}
 
 func _ready():
-	connect("player_list_changed", self, "dump_charloader_data_to_cache", [], CONNECT_DEFERRED)
 	multihustle_action_button_manager = preload("res://MultiHustle/ActionButtonManager.gd").new()
 	add_child(multihustle_action_button_manager)
 

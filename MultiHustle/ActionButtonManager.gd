@@ -47,6 +47,7 @@ func init_actionbuttons()->void:
 		if !last_active.has(id) or !is_instance_valid(last_active[id]):
 			last_active[id] = action_buttons_right[id]
 
+	"""
 	if !Network.multiplayer_active:
 		set_active_buttons(1, false)
 		set_active_buttons(2, true)
@@ -58,6 +59,10 @@ func init_actionbuttons()->void:
 		else:
 			var a = 2
 			set_active_buttons(a, true)
+	"""
+
+	set_active_buttons(1, false)
+	set_active_buttons(2, true)
 
 	# TODO - Replace this with some real logic
 	for buttons in action_buttons_left.values():
@@ -76,9 +81,13 @@ func setup_buttons(id:int, is_right:bool):
 	if !group.has(id):
 		action_buttons = action_buttons_scene.instance()
 		if !is_right:
+			action_buttons.opponent_action_buttons_path = "/root/Main/UILayer/GameUI/BottomBar/ActionButtons/VBoxContainer2/P2ActionButtons"
+			action_buttons.opponent_action_buttons = get_node("/root/Main/UILayer/GameUI/BottomBar/ActionButtons/VBoxContainer2/P2ActionButtons")
 			vbox_container_left.add_child(action_buttons)
 			set_custom_data(action_buttons, custom_data_left)
 		else:
+			action_buttons.opponent_action_buttons_path = "/root/Main/UILayer/GameUI/BottomBar/ActionButtons/VBoxContainer/P1ActionButtons"
+			action_buttons.opponent_action_buttons = get_node("/root/Main/UILayer/GameUI/BottomBar/ActionButtons/VBoxContainer/P1ActionButtons")
 			vbox_container_right.add_child(action_buttons)
 			set_custom_data(action_buttons, custom_data_right)
 		action_buttons.connect("visibility_changed", bottombar, "_on_action_buttons_visibility_changed")

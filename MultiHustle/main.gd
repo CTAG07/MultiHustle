@@ -57,6 +57,7 @@ func setup_game_deferred(singleplayer, data):
 				var customPos = name.find("__")
 				if customPos >= 0:
 					name.erase(0, customPos+2)
+				print(name)
 				name = "P"+str(index)+": "+name
 				user_data["p"+str(index)] = name
 
