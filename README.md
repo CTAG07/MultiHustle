@@ -3,6 +3,10 @@ A work in progress continuation of the original MultiHustle by CTAG07
 
 All credit for original mod idea and code goes to uGuardian
 
+CURRENT GOAL:
+
+- Overhauling the action buttons in an attempt to get online multiplayer work nicer
+
 Planned changes
 - [x] Make it not crash when pressing start
 - [x] Make pressing start do something

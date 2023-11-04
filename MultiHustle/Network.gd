@@ -1,13 +1,6 @@
 extends "res://Network.gd"
 
-# This is a global variable for a manager
-var multihustle_action_button_manager
-
 var char_loaded = {}
-
-func _ready():
-	multihustle_action_button_manager = preload("res://MultiHustle/ActionButtonManager.gd").new()
-	add_child(multihustle_action_button_manager)
 
 func is_modded():
 	return true

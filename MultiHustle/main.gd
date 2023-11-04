@@ -89,7 +89,14 @@ func setup_game_deferred(singleplayer, data):
 	$"%P2InfoContainer".add_child(p2_info_scene)
 	$"%P2InfoContainer".move_child(p2_info_scene, 0)
 
-func on_action_clicked(action, data, extra, player_id):
+func on_action_clicked(action, data, extra, id):
+	var player_id
+	if id == 1:
+		player_id = $"%P1ActionButtons".id
+	elif id == 2:
+		player_id = $"%P2ActionButtons".id
+	else:
+		player_id = 1
 	player_ghost_actions[player_id] = action
 	player_ghost_datas[player_id] = data
 	player_ghost_extras[player_id] = extra
@@ -192,16 +199,6 @@ func MultiHustle_AddData():
 	var uiselectors = multiHustle_UISelectors.instance()
 	ui_layer.add_child(uiselectors)
 	ui_layer.multiHustle_UISelectors = uiselectors
-	var button_manager = Network.multihustle_action_button_manager
-	button_manager.main = self
-	button_manager.owner = owner
-	#button_manager.action_buttons_left[1] = $"%P1ActionButtons"
-	#button_manager.action_buttons_right[2] = $"%P2ActionButtons"
-	button_manager.bottombar = $"%BottomBar"
-	var all_buttons = $"%ActionButtons"
-	button_manager.vbox_container_left = all_buttons.get_child(0)
-	button_manager.vbox_container_right = all_buttons.get_child(1)
-	button_manager.init_actionbuttons()
 	uiselectors.Init(self)
 
 func fix_ghost_objects(ghost_game_):

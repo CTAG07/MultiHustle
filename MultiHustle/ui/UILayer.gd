@@ -68,44 +68,28 @@ func _on_turn_timer_timeout(player_id):
 func GetRealID(player_id):
 	return multiHustle_UISelectors.selects[player_id][0].activeCharIndex
 
+func submit_dummy_action(player_id):
+	#Submits a blank action, used for locking all players in at once and locking in dead players
+	.end_turn_for(player_id)
+	var fighter = game.get_player(player_id)
+	fighter.on_action_selected("Continue", null, null)
+	turns_taken[player_id] = true
+	Network.turns_ready[player_id] = true
+
 func on_player_actionable():
 	Network.action_submitted = false
 	multiHustle_UISelectors.ResetGhosts()
-	var button_manager = Network.multihustle_action_button_manager
-	var last_active = button_manager.last_active
 	for index in game.players.keys():
 		var player = game.players[index]
 		if player.game_over:
-			last_active[index]._on_submit_pressed()
-			turns_taken[index] = true
-			Network.turns_ready[index] = true
+			submit_dummy_action(index)
 		else:
 			turns_taken[index] = false
 			Network.turns_ready[index] = false
-	var has_refreshed = button_manager.active_buttons_left.visible or button_manager.active_buttons_right.visible
 	.on_player_actionable()
-	if !has_refreshed:
-		for index in game.players.keys():
-			if button_manager.action_buttons_left.has(index):
-				activate_button(index, false)
-			if button_manager.action_buttons_right.has(index):
-				activate_button(index, true)
-
-func activate_button(index, is_right:bool):
-	var button_manager = Network.multihustle_action_button_manager
-	var buttons
-	if !is_right:
-		buttons = button_manager.action_buttons_left[index]
-	else:
-		buttons = button_manager.action_buttons_right[index]
-	if button_manager.active_buttons_left == buttons or button_manager.active_buttons_right == buttons:
-		return
-	buttons.activate()
-	buttons.hide()
 
 func ContinueAll():
 	if !Network.multiplayer_active:
-		var buttons = Network.multihustle_action_button_manager.last_active
 		for index in game.players.keys():
-			var player = game.players[index]
-			buttons[index]._on_submit_pressed()
+			if turns_taken[index] == false:
+				submit_dummy_action(index)
