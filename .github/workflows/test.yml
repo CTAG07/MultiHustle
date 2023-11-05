@@ -5,7 +5,7 @@ on:
     paths:
       - 'version.txt'
     branches:
-      - master
+      - main
 
 jobs:
   build-and-release:
