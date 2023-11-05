@@ -5,6 +5,8 @@ var spacebar_handler
 
 var logger = preload("res://MultiHustle/logger.gd")
 
+var turn_timers = {}
+
 func _on_game_playback_requested():
 	if Network.multiplayer_active and not ReplayManager.resimulating:
 		$PostGameButtons.show()
@@ -13,11 +15,18 @@ func _on_game_playback_requested():
 			#$"%RematchButton".show()
 		Network.rematch_menu = true
 
+func _ready():
+	p1_turn_timer.disconnect("timeout", self, "_on_turn_timer_timeout")
+	p2_turn_timer.disconnect("timeout", self, "_on_turn_timer_timeout")
+
 func init(game):
 	.init(game)
 	turns_taken = {}
+	turn_timers = {}
 	for index in game.players.keys():
 		turns_taken[index] = false
+		turn_timers[index] = Timer.new()
+		turn_timers[index].connect("timeout", self, "_on_turn_timer_timeout", [index])
 	game.turns_taken = turns_taken
 	if !is_instance_valid(spacebar_handler):
 		spacebar_handler = preload("res://MultiHustle/SpacebarControl.gd").new()
@@ -29,16 +38,16 @@ func sync_timer(player_id):
 		player_id = GetRealID(player_id)
 		if player_id == Network.player_id:
 			logger.mh_log("syncing timer")
-			var timer
-			match(player_id):
-				1:
-					timer = p1_turn_timer
-				2:
-					timer = p2_turn_timer
-				_:
-					# TODO
-					pass
+			var timer = turn_timers[player_id]
 			Network.sync_timer(player_id, timer.time_left)
+
+func _on_sync_timer_request(id, time):
+	if not chess_timer:
+		return
+	var timer = turn_timers[id]
+	var paused = timer.paused
+	timer.start(time)
+	timer.paused = paused
 
 func id_to_action_buttons(player_id):
 	if multiHustle_UISelectors.selects[1][0].activeCharIndex == player_id:
@@ -61,9 +70,11 @@ func end_turn_for(player_id):
 	.end_turn_for(player_id)
 
 func _on_turn_timer_timeout(player_id):
-	# TODO - Uhh
-	player_id = GetRealID(player_id)
-	._on_turn_timer_timeout(player_id)
+	submit_dummy_action(player_id)
+	var timer = turn_timers[player_id]
+	timer.wait_time = MIN_TURN_TIME
+	timer.start()
+	timer.paused = true
 
 func GetRealID(player_id):
 	return multiHustle_UISelectors.selects[player_id][0].activeCharIndex
