@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'version.txt'
+    branches:
+      - main
 
 jobs:
   build-and-release:
