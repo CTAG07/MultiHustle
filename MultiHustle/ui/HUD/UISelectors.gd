@@ -17,10 +17,9 @@ func Init(main):
 		charSelect.opponentSelect = oppSelect
 		if id == 1 && Network.multiplayer_active:
 			charSelect.Init(main, Network.player_id)
-			charSelect.hide()
 			assigned_ids.append(Network.player_id)
 		else:
-			var new_id = id
+			var new_id = 1
 			while assigned_ids.has(new_id):
 				new_id += 1
 			charSelect.Init(main, new_id)

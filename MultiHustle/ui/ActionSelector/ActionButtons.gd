@@ -136,6 +136,38 @@ func reset():
 	forfeit = false
 	buttons = []
 
+func _on_submit_pressed():
+	logger.mh_log("Submit pressed for player " + str(id))
+	lock_in_pressed = true
+	yield (get_tree(), "idle_frame")
+	yield (get_tree(), "idle_frame")
+
+	if attempting_lock_in:
+		return 
+	attempting_lock_in = true
+	while not can_lock_in:
+		yield (get_tree(), "idle_frame")
+	attempting_lock_in = false
+	var data = null
+	if current_button:
+		data = current_button.get_data()
+	if current_action:
+		on_action_submitted(current_action, data)
+	lock_in_pressed = false
+	locked_in = true
+
+func on_action_submitted(action, data = null, extra = null):
+	logger.mh_log("Submitting action for player " + str(id))
+	active = false
+	extra = get_extra() if extra == null else extra
+	$"%SelectButton".disabled = true
+	emit_signal("turn_ended")
+	$"%SelectButton".shortcut = null
+	emit_signal("action_selected", action, data, extra)
+	if not SteamLobby.SPECTATING:
+		if Network.player_id == player_id:
+			Network.submit_action(action, data, extra)
+
 func get_extra()->Dictionary:
 	if is_instance_valid(game):
 		# I now get opponent first, just to be sure, for some reason.
@@ -151,6 +183,13 @@ func get_extra()->Dictionary:
 func disable_select():
 	$"%SelectButton".disabled = true
 	$"%SelectButton".shortcut = null
+
+func update_select_button():
+	var user_facing = game.singleplayer or Network.player_id == id
+	if not user_facing:
+		$"%SelectButton".disabled = true
+	else :
+		$"%SelectButton".disabled = game.spectating or locked_in
 
 func activate(refresh = true):
 	if visible and refresh:
@@ -174,7 +213,7 @@ func activate(refresh = true):
 		$"%LastMoveTexture".visible = not last_action.is_hurt_state
 		$"%LastMoveLabel".visible = not last_action.is_hurt_state
 
-	var user_facing = game.singleplayer or Network.player_id == player_id
+	var user_facing = game.singleplayer or Network.player_id == id
 	if Network.multiplayer_active:
 		if user_facing:
 			$"%YouLabel".show()

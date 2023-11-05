@@ -117,7 +117,7 @@ func rpc_(function_name:String, arg = null):
 		_send_P2P_Packet(0, data)
 
 func _receive_rpc(data):
-	print("received steam rpc")
+	logger.mh_log("received steam rpc")
 	var a = false
 	for id in OPPONENT_IDS.values():
 		if id == p2p_packet_sender:
@@ -150,14 +150,14 @@ func _read_P2P_Packet():
 	if PACKET_SIZE > 0:
 		var PACKET:Dictionary = Steam.readP2PPacket(PACKET_SIZE, 0)
 		if PACKET.empty() or PACKET == null:
-			print("WARNING: read an empty packet with non-zero size!")
+			logger.mh_log("WARNING: read an empty packet with non-zero size!")
 		var PACKET_SENDER:int = PACKET["steam_id_remote"]
 		p2p_packet_sender = PACKET_SENDER
 		var PACKET_CODE:PoolByteArray = PACKET["data"]
 		var readable:Dictionary = bytes2var(PACKET_CODE)
 		logger.mh_log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable))
 		if readable.has("rpc_data"):
-			print("received rpc")
+			logger.mh_log("received rpc")
 			_receive_rpc(readable)
 		if readable.has("challenge_from"):
 			_receive_challenge(readable.challenge_from, readable.match_settings)
@@ -228,14 +228,4 @@ func _read_P2P_Packet():
 
 func _send_P2P_Packet(target:int, packet_data:Dictionary)->void :
 	logger.mh_log("Sending P2P packet! Data: " + str(packet_data))
-	var SEND_TYPE:int = Steam.P2P_SEND_RELIABLE
-	var CHANNEL:int = 0
-	var DATA:PoolByteArray
-	DATA.append_array(var2bytes(packet_data))
-	if target == 0:
-		if LOBBY_MEMBERS.size() > 1:
-			for MEMBER in LOBBY_MEMBERS:
-				if MEMBER.steam_id != SteamHustle.STEAM_ID:
-					Steam.sendP2PPacket(MEMBER.steam_id, DATA, SEND_TYPE, CHANNEL)
-	else :
-		Steam.sendP2PPacket(target, DATA, SEND_TYPE, CHANNEL)
+	._send_P2P_Packet(target, packet_data)

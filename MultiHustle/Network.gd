@@ -2,6 +2,8 @@ extends "res://Network.gd"
 
 var char_loaded = {}
 
+var logger = preload("res://MultiHustle/logger.gd")
+
 func is_modded():
 	return true
 
@@ -40,3 +42,47 @@ func pid_to_username(player_id):
 	if direct_connect:
 		return players[network_ids[opponent_player_id(player_id)]]
 	return players[network_ids[player_id]]
+
+remotesync func end_turn_simulation(tick, player_id):
+	print("ending turn simulation for player " + str(player_id) + " at tick " + str(tick))
+	ticks[player_id] = tick
+	if ticks[1] == ticks[2]:
+		turn_synced = true
+		send_ready = false
+		emit_signal("player_turns_synced")
+
+func submit_action(action, data, extra):
+	if multiplayer_active:
+		action_inputs[player_id]["action"] = action
+		action_inputs[player_id]["data"] = data
+		action_inputs[player_id]["extra"] = extra
+		rpc_("multiplayer_turn_ready", player_id)
+		print("Submitting action " + action + " as player " + str(player_id))
+
+func rpc_(function_name:String, arg = null, type = "remotesync"):
+	logger.mh_log("Sending rpc! Function: " + str(function_name) + " | Args: " + str(arg))
+	.rpc_(function_name, arg, type)
+
+remotesync func multiplayer_turn_ready(id):
+	Network.turns_ready[id] = true
+	print("turn ready for player " + str(id))
+	emit_signal("player_turn_ready", id)
+	if steam:
+		SteamLobby.spectator_turn_ready(id)
+	var ready = true
+	for r in Network.turns_ready:
+		if !r:
+			ready = false
+			break
+	if ready:
+		action_submitted = true
+		print("sending action")
+		var action_input = action_inputs[player_id]
+		last_action = action_input
+		if is_instance_valid(game):
+			last_action_sent_tick = game.current_tick
+		send_current_action()
+		possible_softlock = true
+		emit_signal("turn_ready")
+		turn_synced = false
+		send_ready = true

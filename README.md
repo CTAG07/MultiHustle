@@ -5,7 +5,7 @@ All credit for original mod idea and code goes to uGuardian
 
 CURRENT GOAL:
 
-- Sync stuff, make the game work past turn 1
+- Most stuff should be synced? Needs to go past turn 1 still
 
 Planned changes
 - [x] Make it not crash when pressing start
@@ -14,8 +14,8 @@ Planned changes
 - [x] Make character select work
 - [x] Make character select lead to game
 - [x] Make sending moves work
-- [ ] Make syncing things (such as timer) work
-- [ ] Lock p1 to left side of screen
+- [x] Make syncing things (such as timer) work
+- [x] Lock p1 to left side of screen
 - [ ] Fix any bugs that come from online
 - [ ] Fix any bugs in base multiplayer
 - [ ] Custom characters support

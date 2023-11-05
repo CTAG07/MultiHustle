@@ -57,7 +57,6 @@ func setup_game_deferred(singleplayer, data):
 				var customPos = name.find("__")
 				if customPos >= 0:
 					name.erase(0, customPos+2)
-				print(name)
 				name = "P"+str(index)+": "+name
 				user_data["p"+str(index)] = name
 
@@ -69,9 +68,9 @@ func setup_game_deferred(singleplayer, data):
 			ui_layer.set_turn_time(data.turn_time, (data.has("chess_timer") and data.chess_timer))
 		else :
 			ui_layer.start_timers()
+	MultiHustle_AddData()
 	ui_layer.init(game)
 	hud_layer.init(game)
-	MultiHustle_AddData()
 	var p1 = game.get_player(1)
 	var p2 = game.get_player(2)
 	p1.debug_label = $"%DebugLabelP1"

@@ -745,9 +745,6 @@ func apply_hitboxes_internal(playerhitboxpair:Array):
 			if not px2.is_grounded() and not p2_hit_by.hits_vs_aerial:
 				can_hit = false
 
-
-
-
 			if can_hit:
 				if throws_consumed[px1] != null:
 					return
@@ -772,9 +769,6 @@ func apply_hitboxes_internal(playerhitboxpair:Array):
 				can_hit = false
 			if not px1.is_grounded() and not p1_hit_by.hits_vs_aerial:
 				can_hit = false
-
-
-
 
 			if can_hit:
 				if throws_consumed[px2] != null:
@@ -803,7 +797,6 @@ func apply_hitboxes_objects(players:Array):
 				continue
 			var can_be_hit_by_melee = object.get("can_be_hit_by_melee")
 
-
 			if p:
 				if p.projectile_invulnerable and object.get("immunity_susceptible"):
 					continue
@@ -825,17 +818,6 @@ func apply_hitboxes_objects(players:Array):
 							throws_consumed[object] = p
 					else:
 						MH_wrapped_hit(obj_hit_by, object)
-
-
-
-
-
-
-
-
-
-
-
 
 			# TODO - Figure this out
 			var opp_objects = []
@@ -980,12 +962,20 @@ func process_tick():
 				if player.state_interruptable and !player_turns[index] and player.hp > 0:
 					someones_turn = true # Keep an eye on this
 					break
+			
+			print(someones_turn)
+
 			if someones_turn:
 				for index in players.keys():
 					var player = players[index]
 					if player.state_interruptable and !player_turns[index]:
 						player.show_you_label()
 						player_turns[index] = true
+						match(index):
+							1:
+								p1_turn = true
+							2:
+								p2_turn = true
 					else:
 						player.busy_interrupt = ( not player.state_interruptable and not (player.current_state().interruptible_on_opponent_turn or player.feinting or negative_on_hit(player)))
 						player.state_interruptable = true

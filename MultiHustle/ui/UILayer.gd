@@ -34,8 +34,8 @@ func init(game):
 		add_child(spacebar_handler)
 
 func sync_timer(player_id):
+	logger.mh_log("Syncing time for player id " + str(player_id))
 	if Network.multiplayer_active:
-		player_id = GetRealID(player_id)
 		if player_id == Network.player_id:
 			logger.mh_log("syncing timer")
 			var timer = turn_timers[player_id]
@@ -46,13 +46,14 @@ func _on_sync_timer_request(id, time):
 		return
 	var timer = turn_timers[id]
 	var paused = timer.paused
-	timer.start(time)
+	timer.autostart = true
+	timer.wait_time = time
 	timer.paused = paused
 
 func id_to_action_buttons(player_id):
 	if multiHustle_UISelectors.selects[1][0].activeCharIndex == player_id:
 		return $"%P1ActionButtons"
-	if multiHustle_UISelectors.selects[1][0].activeCharIndex == player_id:
+	if multiHustle_UISelectors.selects[2][0].activeCharIndex == player_id:
 		return $"%P2ActionButtons"
 	# Emergency Fallback
 	if player_id == 1:
@@ -63,29 +64,50 @@ func id_to_action_buttons(player_id):
 
 func _on_player_turn_ready(player_id):
 	player_id = GetRealID(player_id)
-	._on_player_turn_ready(player_id)
+	turn_timers[player_id].paused = true
+	if not is_instance_valid(game):
+		return 
+	lock_in_tick = game.current_tick
+	if player_id != Network.player_id or SteamLobby.SPECTATING:
+		$"%TurnReadySound".play()
+
+	turns_taken[player_id] = true
+
+func setup_action_buttons():
+	$"%P1ActionButtons".init(game, GetRealID(1))
+	$"%P2ActionButtons".init(game, GetRealID(2))
 
 func end_turn_for(player_id):
 	player_id = GetRealID(player_id)
-	.end_turn_for(player_id)
+	turn_timers[player_id].paused = true
+	$"%TurnReadySound".play()
+	turns_taken[player_id] = true
+	if player_id == Network.player_id:
+		sync_timer(player_id)
 
 func _on_turn_timer_timeout(player_id):
 	submit_dummy_action(player_id)
 	var timer = turn_timers[player_id]
 	timer.wait_time = MIN_TURN_TIME
-	timer.start()
+	timer.autostart = true
 	timer.paused = true
 
 func GetRealID(player_id):
 	return multiHustle_UISelectors.selects[player_id][0].activeCharIndex
 
+#Submits a blank action, used for locking all players in at once and locking in dead players
 func submit_dummy_action(player_id):
-	#Submits a blank action, used for locking all players in at once and locking in dead players
 	.end_turn_for(player_id)
 	var fighter = game.get_player(player_id)
 	fighter.on_action_selected("Continue", null, null)
 	turns_taken[player_id] = true
 	Network.turns_ready[player_id] = true
+
+func ContinueAll():
+	if !Network.multiplayer_active:
+		for index in game.players.keys():
+			if turns_taken[index] == false:
+				submit_dummy_action(index)
 
 func on_player_actionable():
 	Network.action_submitted = false
@@ -98,9 +120,29 @@ func on_player_actionable():
 			turns_taken[index] = false
 			Network.turns_ready[index] = false
 	.on_player_actionable()
+	if Network.multiplayer_active or SteamLobby.SPECTATING:
+		if not game_started:
+			for timer in turn_timers.values():
+				timer.autostart = true
+		else :
+			if not chess_timer:
+				for timer in turn_timers.values():
+					timer.autostart = true
+					timer.wait_time = turn_time
+			else :
+				for timer in turn_timers.values():
+					if timer.time_left < MIN_TURN_TIME:
+						timer.autostart = true
+						timer.wait_time = MIN_TURN_TIME
+		for timer in turn_timers.values():
+			timer.paused = false
 
-func ContinueAll():
-	if !Network.multiplayer_active:
-		for index in game.players.keys():
-			if turns_taken[index] == false:
-				submit_dummy_action(index)
+func start_timers():
+	.start_timers()
+	for timer in turn_timers.values():
+		timer.paused = false
+
+func set_turn_time(time, minutes = false):
+	.set_turn_time(time, minutes)
+	for timer in turn_timers.values():
+		timer.wait_time = time * (60 if minutes else 1)
