@@ -7,23 +7,23 @@ var sync_confirms = {}
 
 signal start_game()
 
-var logger = preload("res://MultiHustle/logger.gd")
+
 
 func _setup_game_vs(steam_id):
-	logger.mh_log("Normal game setup got called for some reason")
+	Network.log("Normal game setup got called for some reason")
 	host_game_vs_all()
 
 func host_game_vs_all():
-	logger.mh_log("host_game_vs_all called")
+	Network.log("host_game_vs_all called")
 	if SteamHustle.STEAM_ID != LOBBY_OWNER:
-		logger.mh_log("Only host can setup")
+		Network.log("Only host can setup")
 		return
-	logger.mh_log("registering players")
+	Network.log("registering players")
 	REMATCHING_ID = 0
 	OPPONENT_IDS.clear()
 	OPPONENT_IDS[1] = SteamHustle.STEAM_ID
 	var idx = 1
-	logger.mh_log("Lobby members: " + str(LOBBY_MEMBERS))
+	Network.log("Lobby members: " + str(LOBBY_MEMBERS))
 	for member in LOBBY_MEMBERS:
 		#Exclude ourselves when counting lobby members
 		if member.steam_id != SteamHustle.STEAM_ID:
@@ -43,7 +43,7 @@ func host_game_vs_all():
 	multihustle_start()
 
 func multihustle_start():
-	logger.mh_log("multihustle_start called")
+	Network.log("multihustle_start called")
 	OPPONENT_ID = LOBBY_OWNER
 	var data = {
 		"multihustle_start":OPPONENT_IDS,
@@ -52,8 +52,8 @@ func multihustle_start():
 	send_sync(OPPONENT_IDS)
 
 func send_sync(OPPONENT_IDS):
-	logger.mh_log("send_sync called")
-	logger.mh_log("opponent ids: " + str(OPPONENT_IDS))
+	Network.log("send_sync called")
+	Network.log("opponent ids: " + str(OPPONENT_IDS))
 	OPPONENT_ID = LOBBY_OWNER
 	self.OPPONENT_IDS = OPPONENT_IDS
 	for steam_id in sync_confirms.keys():
@@ -72,7 +72,7 @@ func send_sync(OPPONENT_IDS):
 	_send_P2P_Packet(0, data)
 
 func sync_confirm(steam_id):
-	logger.mh_log("sync_confirm called")
+	Network.log("sync_confirm called")
 	sync_confirms[steam_id] = true
 	if is_syncing:
 		for confirmation in sync_confirms.values():
@@ -83,8 +83,8 @@ func sync_confirm(steam_id):
 		_setup_game_vs_group(OPPONENT_IDS)
 
 func _setup_game_vs_group(OPPONENT_IDS):
-	logger.mh_log("_setup_game_vs_group called")
-	logger.mh_log("opponent ids: " + str(OPPONENT_IDS))
+	Network.log("_setup_game_vs_group called")
+	Network.log("opponent ids: " + str(OPPONENT_IDS))
 	SETTINGS_LOCKED = true
 	self.OPPONENT_IDS = OPPONENT_IDS
 	Network.char_loaded.clear()
@@ -97,7 +97,7 @@ func _setup_game_vs_group(OPPONENT_IDS):
 			Network.player_id = index
 			Steam.setLobbyMemberData(SteamLobby.LOBBY_ID, "player_id", str(index))
 			break
-	logger.mh_log("made it to character select")
+	Network.log("made it to character select")
 	Network.network_ids = OPPONENT_IDS
 	if SteamHustle.STEAM_ID == LOBBY_OWNER:
 		rpc_("open_chara_select")
@@ -117,7 +117,7 @@ func rpc_(function_name:String, arg = null):
 		_send_P2P_Packet(0, data)
 
 func _receive_rpc(data):
-	logger.mh_log("received steam rpc")
+	Network.log("received steam rpc")
 	var a = false
 	for id in OPPONENT_IDS.values():
 		if id == p2p_packet_sender:
@@ -150,14 +150,14 @@ func _read_P2P_Packet():
 	if PACKET_SIZE > 0:
 		var PACKET:Dictionary = Steam.readP2PPacket(PACKET_SIZE, 0)
 		if PACKET.empty() or PACKET == null:
-			logger.mh_log("WARNING: read an empty packet with non-zero size!")
+			Network.log("WARNING: read an empty packet with non-zero size!")
 		var PACKET_SENDER:int = PACKET["steam_id_remote"]
 		p2p_packet_sender = PACKET_SENDER
 		var PACKET_CODE:PoolByteArray = PACKET["data"]
 		var readable:Dictionary = bytes2var(PACKET_CODE)
-		logger.mh_log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable))
+		Network.log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable))
 		if readable.has("rpc_data"):
-			logger.mh_log("received rpc")
+			Network.log("received rpc")
 			_receive_rpc(readable)
 		if readable.has("challenge_from"):
 			_receive_challenge(readable.challenge_from, readable.match_settings)
@@ -227,5 +227,5 @@ func _read_P2P_Packet():
 		_read_P2P_Packet_custom(readable)
 
 func _send_P2P_Packet(target:int, packet_data:Dictionary)->void :
-	logger.mh_log("Sending P2P packet! Data: " + str(packet_data))
+	Network.log("Sending P2P packet! Data: " + str(packet_data))
 	._send_P2P_Packet(target, packet_data)

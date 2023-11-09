@@ -1,12 +1,10 @@
 extends Node
 
-const file_path = "user://logs/mhlogs.log"
-
-static func mh_log(message: String, clear = false):
+static func mh_log(message: String, file_path: String):
   var file = File.new()
   var result = file.open(file_path, File.READ_WRITE)
-  if result != OK or clear:
-    file.open(file_path, File.WRITE_READ)
+  while result != OK:
+    result = file.open(file_path, File.WRITE)
   var text = file.get_as_text()
   file.store_string(text + "[Multihustle] " + message + "\n")
   file.close()

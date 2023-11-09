@@ -1,13 +1,13 @@
 extends "res://ui/ActionSelector/ActionButtons.gd"
 
-var logger = preload("res://MultiHustle/logger.gd")
+
 
 var id = null
 
 # Hooked for debugging purposes
 func init(game, pid):
 	id = pid
-	logger.mh_log("Init called for action buttons! ID: " + str(pid))
+	Network.log("Init called for action buttons! ID: " + str(pid))
 	reset()
 	self.game = game
 	fighter = game.get_player(pid)
@@ -47,7 +47,7 @@ func init(game, pid):
 	$"%TurnButtons".add_child(continue_button)
 	$"%TurnButtons".move_child(continue_button, 1)
 
-	logger.mh_log("Init finished for action buttons! ID: " + str(pid))
+	Network.log("Init finished for action buttons! ID: " + str(pid))
 
 func re_init(pid):
 	id = pid
@@ -56,7 +56,7 @@ func re_init(pid):
 		fighter.disconnect("action_selected", self, "_on_fighter_action_selected")
 		fighter.disconnect("forfeit", self, "_on_fighter_forfeit")
 
-	logger.mh_log("Re-Init called for action buttons! ID: " + str(pid))
+	Network.log("Re-Init called for action buttons! ID: " + str(pid))
 
 	reset()
 	fighter = game.get_player(pid)
@@ -96,7 +96,7 @@ func re_init(pid):
 
 	activate()
 
-	logger.mh_log("Re-Init finished for action buttons! ID: " + str(id))
+	Network.log("Re-Init finished for action buttons! ID: " + str(id))
 
 func reset():
 	visible = false
@@ -137,7 +137,7 @@ func reset():
 	buttons = []
 
 func _on_submit_pressed():
-	logger.mh_log("Submit pressed for player " + str(id))
+	Network.log("Submit pressed for player " + str(id))
 	lock_in_pressed = true
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
@@ -157,7 +157,7 @@ func _on_submit_pressed():
 	locked_in = true
 
 func on_action_submitted(action, data = null, extra = null):
-	logger.mh_log("Submitting action for player " + str(id))
+	Network.log("Submitting action for player " + str(id))
 	active = false
 	extra = get_extra() if extra == null else extra
 	$"%SelectButton".disabled = true
@@ -177,7 +177,7 @@ func get_extra()->Dictionary:
 		extra.merge(.get_extra())
 		return extra
 	else:
-		logger.mh_log("game was somehow null")
+		Network.log("game was somehow null")
 		return .get_extra()
 
 func disable_select():
@@ -268,7 +268,7 @@ func activate(refresh = true):
 	fighter.any_available_actions = any_available_actions
 	if user_facing and $"%AutoButton".pressed:
 		if not any_available_actions:
-			logger.mh_log("no available actions!")
+			Network.log("no available actions!")
 			on_action_submitted("Continue", null)
 			current_action = "Continue"
 

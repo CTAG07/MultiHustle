@@ -8,15 +8,13 @@ var multiHustle_CharManager_res = preload("res://MultiHustle/CharManager.gd")
 var multiHustle_CharManager
 var multiHustle_UISelectors = preload("res://MultiHustle/ui/HUD/UISelectors.tscn")
 
-var logger = preload("res://MultiHustle/logger.gd")
-
 func _ready():
 	$"%P1ShowStyle".disconnect("toggled", self, "_on_show_style_toggled")
 	$"%P2ShowStyle".disconnect("toggled", self, "_on_show_style_toggled")
 
 func setup_game_deferred(singleplayer, data):
-	logger.mh_log("Setup_game_deferred called")
-	logger.mh_log("Starting game with data: " + str(data))
+	Network.log("Setup_game_deferred called")
+	Network.log("Starting game with data: " + str(data))
 	game = preload("res://Game.tscn").instance()
 	Network.ensure_script_override(game)
 	#game.set_script(load("res://game.gd"))
@@ -61,7 +59,7 @@ func setup_game_deferred(singleplayer, data):
 				user_data["p"+str(index)] = name
 
 	if game.start_game(singleplayer, data) is bool:
-		logger.mh_log("Something went wrong starting the game")
+		Network.log("Something went wrong starting the game")
 		return
 	if data.has("turn_time"):
 		if not Network.undo or (data.has("chess_timer") and not data.chess_timer):

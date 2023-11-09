@@ -3,7 +3,7 @@ extends "res://ui/UILayer.gd"
 var multiHustle_UISelectors
 var spacebar_handler
 
-var logger = preload("res://MultiHustle/logger.gd")
+
 
 var turn_timers = {}
 
@@ -27,6 +27,7 @@ func init(game):
 		turns_taken[index] = false
 		turn_timers[index] = Timer.new()
 		turn_timers[index].connect("timeout", self, "_on_turn_timer_timeout", [index])
+		add_child(turn_timers[index], true)
 	game.turns_taken = turns_taken
 	if !is_instance_valid(spacebar_handler):
 		spacebar_handler = preload("res://MultiHustle/SpacebarControl.gd").new()
@@ -34,10 +35,10 @@ func init(game):
 		add_child(spacebar_handler)
 
 func sync_timer(player_id):
-	logger.mh_log("Syncing time for player id " + str(player_id))
+	Network.log("Syncing time for player id " + str(player_id))
 	if Network.multiplayer_active:
 		if player_id == Network.player_id:
-			logger.mh_log("syncing timer")
+			Network.log("syncing timer")
 			var timer = turn_timers[player_id]
 			Network.sync_timer(player_id, timer.time_left)
 
@@ -46,8 +47,7 @@ func _on_sync_timer_request(id, time):
 		return
 	var timer = turn_timers[id]
 	var paused = timer.paused
-	timer.autostart = true
-	timer.wait_time = time
+	timer.start(time)
 	timer.paused = paused
 
 func id_to_action_buttons(player_id):
@@ -89,7 +89,7 @@ func _on_turn_timer_timeout(player_id):
 	submit_dummy_action(player_id)
 	var timer = turn_timers[player_id]
 	timer.wait_time = MIN_TURN_TIME
-	timer.autostart = true
+	timer.start()
 	timer.paused = true
 
 func GetRealID(player_id):
@@ -123,19 +123,18 @@ func on_player_actionable():
 	if Network.multiplayer_active or SteamLobby.SPECTATING:
 		if not game_started:
 			for timer in turn_timers.values():
-				timer.autostart = true
+				timer.start()
 		else :
 			if not chess_timer:
 				for timer in turn_timers.values():
-					timer.autostart = true
-					timer.wait_time = turn_time
+					timer.start(turn_time)
 			else :
 				for timer in turn_timers.values():
 					if timer.time_left < MIN_TURN_TIME:
-						timer.autostart = true
-						timer.wait_time = MIN_TURN_TIME
+						timer.start(MIN_TURN_TIME)
 		for timer in turn_timers.values():
 			timer.paused = false
+	
 
 func start_timers():
 	.start_timers()

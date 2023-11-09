@@ -2,12 +2,17 @@ extends "res://Network.gd"
 
 var char_loaded = {}
 
-var logger = preload("res://MultiHustle/logger.gd")
-
 func is_modded():
 	return true
 
+#Oh my god I hate this so much but it somehow works in testing dpajwojiosdfnikvkvknovnkonkoiopsja
+var file_path = "user://logs/mhlogs" + Time.get_time_string_from_unix_time(int(Time.get_unix_time_from_system()-(Time.get_ticks_msec()/1000))).replace(":", ".") + ".log"
+var logger = preload("res://MultiHustle/logger.gd")
+
 # Util Functions
+
+func log(msg):
+	logger.mh_log(msg, file_path)
 
 func get_all_pairs(list):
 	var idx = 0
@@ -44,7 +49,7 @@ func pid_to_username(player_id):
 	return players[network_ids[player_id]]
 
 remotesync func end_turn_simulation(tick, player_id):
-	print("ending turn simulation for player " + str(player_id) + " at tick " + str(tick))
+	Network.log("ending turn simulation for player " + str(player_id) + " at tick " + str(tick))
 	ticks[player_id] = tick
 	if ticks[1] == ticks[2]:
 		turn_synced = true
@@ -57,15 +62,15 @@ func submit_action(action, data, extra):
 		action_inputs[player_id]["data"] = data
 		action_inputs[player_id]["extra"] = extra
 		rpc_("multiplayer_turn_ready", player_id)
-		print("Submitting action " + action + " as player " + str(player_id))
+		Network.log("Submitting action " + action + " as player " + str(player_id))
 
 func rpc_(function_name:String, arg = null, type = "remotesync"):
-	logger.mh_log("Sending rpc! Function: " + str(function_name) + " | Args: " + str(arg))
+	Network.log("Sending rpc! Function: " + str(function_name) + " | Args: " + str(arg))
 	.rpc_(function_name, arg, type)
 
 remotesync func multiplayer_turn_ready(id):
 	Network.turns_ready[id] = true
-	print("turn ready for player " + str(id))
+	Network.log("turn ready for player " + str(id))
 	emit_signal("player_turn_ready", id)
 	if steam:
 		SteamLobby.spectator_turn_ready(id)
@@ -76,7 +81,7 @@ remotesync func multiplayer_turn_ready(id):
 			break
 	if ready:
 		action_submitted = true
-		print("sending action")
+		Network.log("sending action")
 		var action_input = action_inputs[player_id]
 		last_action = action_input
 		if is_instance_valid(game):

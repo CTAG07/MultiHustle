@@ -1,41 +1,36 @@
 extends Node
 
-var logger = preload("res://MultiHustle/logger.gd")
-
 func installExtension(childScriptPath:String):
 	var childScript = ResourceLoader.load(childScriptPath)
 	childScript.new()
 	var parentScript = childScript.get_base_script()
 	if parentScript == null:
-		logger.mh_log("Missing dependencies")
+		print("Missing dependencies")
 
 	var parentScriptPath = parentScript.resource_path
-	logger.mh_log("Installing extension from " + childScriptPath + " to " + parentScriptPath)
 	childScript.take_over_path(parentScriptPath)
 
 func _init(modLoader = ModLoader):
 	var meta_data = get_meta_data(modLoader, "MultiHustle")
-	logger.mh_log("Initializing MultiHustle version %s" % meta_data.version, true)
-	modLoader.installScriptExtension("res://MultiHustle/MLMainHook.gd")
-	modLoader.installScriptExtension("res://MultiHustle/main_fake.gd")
-	modLoader.installScriptExtension("res://MultiHustle/mechanics/Hitbox.gd")
-	modLoader.installScriptExtension("res://MultiHustle/characters/states/ThrowState.gd")
-	modLoader.installScriptExtension("res://MultiHustle/characters/swordandgun/states/LassoReel.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ui/ActionSelector/ActionButtons.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ui/CSS/CharacterSelect.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ui/HUD/HudLayer.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/SteamLobby.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ui/UILayer.gd")
+	print("Initializing MultiHustle version %s" % meta_data.version)
+	installExtension("res://MultiHustle/MLMainHook.gd")
+	installExtension("res://MultiHustle/main_fake.gd")
+	installExtension("res://MultiHustle/mechanics/Hitbox.gd")
+	installExtension("res://MultiHustle/characters/states/ThrowState.gd")
+	installExtension("res://MultiHustle/characters/swordandgun/states/LassoReel.gd")
+	installExtension("res://MultiHustle/ui/ActionSelector/ActionButtons.gd")
+	installExtension("res://MultiHustle/ui/CSS/CharacterSelect.gd")
+	installExtension("res://MultiHustle/ui/HUD/HudLayer.gd")
+	installExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
+	installExtension("res://MultiHustle/ui/SteamLobby/SteamLobby.gd")
+	installExtension("res://MultiHustle/ui/UILayer.gd")
 	installExtension("res://MultiHustle/Network.gd")
-	modLoader.installScriptExtension("res://MultiHustle/game.gd")
-	modLoader.installScriptExtension("res://MultiHustle/ReplayManager.gd")
-	modLoader.installScriptExtension("res://MultiHustle/main.gd")
-	modLoader.installScriptExtension("res://MultiHustle/SteamLobby.gd")
+	installExtension("res://MultiHustle/game.gd")
+	installExtension("res://MultiHustle/ReplayManager.gd")
+	installExtension("res://MultiHustle/main.gd")
+	installExtension("res://MultiHustle/SteamLobby.gd")
 
 	#modLoader.saveScene(preload("res://MultiHustle/ui/SteamLobby/LobbyMatch.tscn").instance(), "res://ui/SteamLobby/LobbyMatch.tscn")
-
-	logger.mh_log("Initialized")
 
 func ensure_save(modLoader, path):
 	var instance = load(path).instance()
