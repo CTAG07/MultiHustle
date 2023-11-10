@@ -6,5 +6,5 @@ static func mh_log(message: String, file_path: String):
   while result != OK:
     result = file.open(file_path, File.WRITE)
   var text = file.get_as_text()
-  file.store_string(text + "[Multihustle] " + message + "\n")
+  file.store_string(text + message + "\n")
   file.close()

@@ -16,6 +16,7 @@ func setup_game_deferred(singleplayer, data):
 	Network.log("Setup_game_deferred called")
 	Network.log("Starting game with data: " + str(data))
 	game = preload("res://Game.tscn").instance()
+	
 	Network.ensure_script_override(game)
 	#game.set_script(load("res://game.gd"))
 

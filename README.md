@@ -5,7 +5,7 @@ All credit for original mod idea and code goes to uGuardian
 
 CURRENT GOAL:
 
-- Most stuff should be synced? Needs to go past turn 1 still
+- See if I need to fix a few things to get it working with more than 2 players, although for now 2 players works perfectly
 
 Planned changes
 - [x] Make it not crash when pressing start

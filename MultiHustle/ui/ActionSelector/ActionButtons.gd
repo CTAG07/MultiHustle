@@ -17,7 +17,7 @@ func init(game, pid):
 	game.connect("forfeit_started", self, "_on_forfeit_started")
 	fighter_extra.set_fighter(fighter)
 	turbo_mode = fighter.turbo_mode
-	Network.action_button_panels[pid] = self
+	Network.action_button_panels[player_id] = self
 	buttons = []
 
 
@@ -51,11 +51,6 @@ func init(game, pid):
 
 func re_init(pid):
 	id = pid
-	if is_instance_valid(fighter):
-		disconnect("action_selected", fighter, "on_action_selected")
-		fighter.disconnect("action_selected", self, "_on_fighter_action_selected")
-		fighter.disconnect("forfeit", self, "_on_fighter_forfeit")
-
 	Network.log("Re-Init called for action buttons! ID: " + str(pid))
 
 	reset()
@@ -63,10 +58,9 @@ func re_init(pid):
 	$"%DI".visible = fighter.di_enabled
 	fighter_extra = fighter.player_extra_params_scene.instance()
 	fighter_extra.connect("data_changed", self, "extra_updated")
-	game.connect("forfeit_started", self, "_on_forfeit_started")
 	fighter_extra.set_fighter(fighter)
 	turbo_mode = fighter.turbo_mode
-	Network.action_button_panels[pid] = self
+	Network.action_button_panels[player_id] = self
 	buttons = []
 
 
@@ -101,13 +95,10 @@ func re_init(pid):
 func reset():
 	visible = false
 	if is_instance_valid(fighter_extra):
-		if fighter_extra.is_connected("data_changed", self, "send_ui_action"):
-			fighter_extra.disconnect("data_changed", self, "send_ui_action")
+		if fighter_extra.is_connected("data_changed", self, "extra_updated"):
+			fighter_extra.disconnect("data_changed", self, "extra_updated")
 	else:
 		fighter_extra = null
-	if is_instance_valid(game):
-		if game.is_connected("forfeit_started", self, "_on_forfeit_started"):
-			game.disconnect("forfeit_started", self, "_on_forfeit_started")
 	if is_instance_valid(fighter):
 		if is_connected("action_selected", fighter, "on_action_selected"):
 			disconnect("action_selected", fighter, "on_action_selected")
@@ -137,7 +128,7 @@ func reset():
 	buttons = []
 
 func _on_submit_pressed():
-	Network.log("Submit pressed for player " + str(id))
+	Network.log("Submit pressed for player " + str(id) + " | Current Button: " + str(current_button))
 	lock_in_pressed = true
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
@@ -157,7 +148,7 @@ func _on_submit_pressed():
 	locked_in = true
 
 func on_action_submitted(action, data = null, extra = null):
-	Network.log("Submitting action for player " + str(id))
+	Network.log("Submitting action for player " + str(id) + ", action is " + str(action) + " | " + str(data))
 	active = false
 	extra = get_extra() if extra == null else extra
 	$"%SelectButton".disabled = true
@@ -165,7 +156,7 @@ func on_action_submitted(action, data = null, extra = null):
 	$"%SelectButton".shortcut = null
 	emit_signal("action_selected", action, data, extra)
 	if not SteamLobby.SPECTATING:
-		if Network.player_id == player_id:
+		if Network.player_id == id:
 			Network.submit_action(action, data, extra)
 
 func get_extra()->Dictionary:

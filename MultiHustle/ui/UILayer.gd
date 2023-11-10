@@ -20,15 +20,15 @@ func _ready():
 	p2_turn_timer.disconnect("timeout", self, "_on_turn_timer_timeout")
 
 func init(game):
+	game.turns_taken = {}
+	for index in game.players.keys():
+		game.turns_taken[index] = false
 	.init(game)
-	turns_taken = {}
 	turn_timers = {}
 	for index in game.players.keys():
-		turns_taken[index] = false
 		turn_timers[index] = Timer.new()
 		turn_timers[index].connect("timeout", self, "_on_turn_timer_timeout", [index])
 		add_child(turn_timers[index], true)
-	game.turns_taken = turns_taken
 	if !is_instance_valid(spacebar_handler):
 		spacebar_handler = preload("res://MultiHustle/SpacebarControl.gd").new()
 		spacebar_handler.uilayer = self
@@ -63,7 +63,6 @@ func id_to_action_buttons(player_id):
 	return null
 
 func _on_player_turn_ready(player_id):
-	player_id = GetRealID(player_id)
 	turn_timers[player_id].paused = true
 	if not is_instance_valid(game):
 		return 
@@ -71,7 +70,7 @@ func _on_player_turn_ready(player_id):
 	if player_id != Network.player_id or SteamLobby.SPECTATING:
 		$"%TurnReadySound".play()
 
-	turns_taken[player_id] = true
+	game.turns_taken[player_id] = true
 
 func setup_action_buttons():
 	$"%P1ActionButtons".init(game, GetRealID(1))
@@ -81,12 +80,22 @@ func end_turn_for(player_id):
 	player_id = GetRealID(player_id)
 	turn_timers[player_id].paused = true
 	$"%TurnReadySound".play()
-	turns_taken[player_id] = true
+	game.turns_taken[player_id] = true
 	if player_id == Network.player_id:
 		sync_timer(player_id)
 
 func _on_turn_timer_timeout(player_id):
-	submit_dummy_action(player_id)
+	Network.log("Player " + str(player_id) + " timed out")
+	if player_id == Network.player_id:
+		if GetRealID(1) == Network.player_id:
+			$"%P1ActionButtons".timeout()
+		elif GetRealID(2) == Network.player_id:
+			$"%P2ActionButtons".timeout()
+		else:
+			#Simulate the user selecting themselves on the left side, just so that I can properly call the timeout function.
+			multiHustle_UISelectors.selects[1][0]._item_selected(Network.player_id)
+			$"%P1ActionButtons".timeout()
+
 	var timer = turn_timers[player_id]
 	timer.wait_time = MIN_TURN_TIME
 	timer.start()
@@ -100,13 +109,13 @@ func submit_dummy_action(player_id):
 	.end_turn_for(player_id)
 	var fighter = game.get_player(player_id)
 	fighter.on_action_selected("Continue", null, null)
-	turns_taken[player_id] = true
+	game.turns_taken[player_id] = true
 	Network.turns_ready[player_id] = true
 
 func ContinueAll():
 	if !Network.multiplayer_active:
 		for index in game.players.keys():
-			if turns_taken[index] == false:
+			if game.turns_taken[index] == false:
 				submit_dummy_action(index)
 
 func on_player_actionable():
@@ -117,7 +126,7 @@ func on_player_actionable():
 		if player.game_over:
 			submit_dummy_action(index)
 		else:
-			turns_taken[index] = false
+			game.turns_taken[index] = false
 			Network.turns_ready[index] = false
 	.on_player_actionable()
 	if Network.multiplayer_active or SteamLobby.SPECTATING:

@@ -18,7 +18,7 @@ var game_started_real:bool = false
 
 var multiHustle_CharManager
 
-var turns_taken
+var turns_taken = {}
 
 var needs_refresh = true
 
@@ -930,8 +930,6 @@ func process_tick():
 		ReplayManager.playback = true
 		can_tick = true
 
-
-
 	if not ReplayManager.playback:
 		if not is_waiting_on_player():
 				if can_tick:
@@ -967,6 +965,7 @@ func process_tick():
 				for index in players.keys():
 					var player = players[index]
 					if player.state_interruptable and !player_turns[index]:
+						player_actionable = true
 						player.show_you_label()
 						player_turns[index] = true
 						match(index):
@@ -979,8 +978,6 @@ func process_tick():
 						player.state_interruptable = true
 				if singleplayer:
 					emit_signal("player_actionable")
-
-			if someones_turn:
 				ReplayManager.replaying_ingame = false
 				if Network.multiplayer_active:
 					if self.network_sync_tick != self.current_tick:
