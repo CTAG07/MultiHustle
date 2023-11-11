@@ -57,7 +57,6 @@ remotesync func end_turn_simulation(tick, player_id):
 		emit_signal("player_turns_synced")
 
 func submit_action(action, data, extra):
-	Network.log("Submitting turn ready as player " + str(player_id))
 	if multiplayer_active:
 		action_inputs[player_id]["action"] = action
 		action_inputs[player_id]["data"] = data
@@ -67,7 +66,6 @@ func submit_action(action, data, extra):
 
 func send_current_action():
 	if last_action:
-		Network.log("Sending action " + str([last_action["action"], last_action["data"], last_action["extra"], player_id]) + " as player " + str(player_id))
 		rpc_("send_action", [last_action["action"], last_action["data"], last_action["extra"], player_id], "remote")
 
 func rpc_(function_name:String, arg = null, type = "remotesync"):
@@ -87,7 +85,7 @@ remotesync func multiplayer_turn_ready(id):
 			break
 	if ready:
 		action_submitted = true
-		Network.log("Sending action, action inputs: " + str(action_inputs))
+		Network.log("Sending action, action: " + str(action_inputs[player_id]))
 		last_action = action_inputs[player_id]
 		if is_instance_valid(game):
 			last_action_sent_tick = game.current_tick
@@ -107,3 +105,14 @@ remote func opponent_tick():
 	yield (get_tree(), "idle_frame")
 	if is_instance_valid(game):
 		game.network_simulate_ready = true
+
+func reset_action_inputs():
+	turns_ready = {}
+	action_inputs = {}
+	for player in game.players.keys():
+		action_inputs[player] = {
+			"action":null, 
+			"data":null, 
+			"extra":null, 
+		}
+		turns_ready[player] = false

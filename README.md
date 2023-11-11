@@ -5,7 +5,7 @@ All credit for original mod idea and code goes to uGuardian
 
 CURRENT GOAL:
 
-- See if I need to fix a few things to get it working with more than 2 players, although for now 2 players works perfectly
+- Fixed action selectors, time to get some proper testing done?
 
 Planned changes
 - [x] Make it not crash when pressing start

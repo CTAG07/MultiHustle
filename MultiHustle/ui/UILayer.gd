@@ -93,7 +93,7 @@ func _on_turn_timer_timeout(player_id):
 			$"%P2ActionButtons".timeout()
 		else:
 			#Simulate the user selecting themselves on the left side, just so that I can properly call the timeout function.
-			multiHustle_UISelectors.selects[1][0]._item_selected(Network.player_id)
+			multiHustle_UISelectors.selects[1][0].SelectIndex(Network.player_id)
 			$"%P1ActionButtons".timeout()
 
 	var timer = turn_timers[player_id]
