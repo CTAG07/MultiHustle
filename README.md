@@ -26,6 +26,6 @@ Extra changes (Possibilities after planned changes are done)
 - [ ] Teams in multiplayer
 - [ ] Targeting rework
 - [ ] Mod compatibility
-- [ ] /em support
+- [x] /em support
 - [ ] Anything else wanted
 

@@ -20,7 +20,6 @@ func _item_selected(index):
 	opponentSelect.on_ParentChanged()
 
 func InitUI(index:int):
-	var actionButtons = GetActionButtons()
 	InitHUD(index)
 
 func GetActionButtons():

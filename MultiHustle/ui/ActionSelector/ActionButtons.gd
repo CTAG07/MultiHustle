@@ -184,6 +184,7 @@ func update_select_button():
 
 func activate(refresh = true):
 	if visible and refresh:
+		Network.log("Returning at point A")
 		return
 
 	active = true
@@ -268,6 +269,7 @@ func activate(refresh = true):
 
 	$"%ReverseButton".show()
 	if not refresh:
+		Network.log("Returning at point B")
 		return
 	button_pressed = false
 	send_ui_action("Continue")
@@ -286,3 +288,5 @@ func activate(refresh = true):
 			var input = Network.p2_undo_action
 			on_action_submitted(input["action"], input["data"], input["extra"])
 			Network.p2_undo_action = null
+	
+	Network.log("Action buttons should be showing: " + str(visible) + " | " + str(active))

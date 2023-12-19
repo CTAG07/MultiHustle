@@ -101,7 +101,7 @@ func _setup_game_vs_group(OPPONENT_IDS):
 	Network.network_ids = OPPONENT_IDS
 	if SteamHustle.STEAM_ID == LOBBY_OWNER:
 		rpc_("open_chara_select")
-		Network.callv("open_chara_select", null)
+		Network.callv("open_chara_select", [])
 	Steam.setLobbyMemberData(LOBBY_ID, "status", "fighting")
 	Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", str(OPPONENT_ID))
 
@@ -117,7 +117,6 @@ func rpc_(function_name:String, arg = null):
 		_send_P2P_Packet(0, data)
 
 func _receive_rpc(data):
-	Network.log("received steam rpc")
 	var a = false
 	for id in OPPONENT_IDS.values():
 		if id == p2p_packet_sender:
@@ -157,7 +156,6 @@ func _read_P2P_Packet():
 		var readable:Dictionary = bytes2var(PACKET_CODE)
 		Network.log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable))
 		if readable.has("rpc_data"):
-			Network.log("received rpc")
 			_receive_rpc(readable)
 		if readable.has("challenge_from"):
 			_receive_challenge(readable.challenge_from, readable.match_settings)

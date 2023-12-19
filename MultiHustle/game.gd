@@ -32,7 +32,7 @@ var color_rng:BetterRng = BetterRng.new()
 # Handled this way to avoid constant resizing, assuming Godot isn't stupid
 var throws_consumed:Dictionary = {}
 
-
+var network_simulate_readies = {}
 
 func copy_to(game):
 	set_vanilla_game_started(true)
@@ -918,6 +918,11 @@ func process_tick():
 	if self.super_freeze_ticks > 0:
 		return
 
+	self.network_simulate_ready = true
+	for value in self.network_simulate_readies.values():
+		if !value:
+			self.network_simulate_ready = value
+
 	var can_tick = not Global.frame_advance or (self.advance_frame_input)
 	if can_tick:
 		self.advance_frame_input = false
@@ -983,17 +988,19 @@ func process_tick():
 					if self.network_sync_tick != self.current_tick:
 						Network.rpc_("end_turn_simulation", [self.current_tick, Network.player_id])
 						self.network_sync_tick = self.current_tick
+						for key in self.network_simulate_readies.keys():
+							self.network_simulate_readies[key] = false
 						self.network_simulate_ready = false
 						Network.sync_unlock_turn()
 						Network.on_turn_started()
 
-	else :
+	else:
 		if ReplayManager.resimulating:
 			self.snapping_camera = true
 			call_deferred("resimulate")
 			yield (get_tree(), "idle_frame")
 			self.game_paused = false
-		else :
+		else:
 			if self.buffer_edit:
 				ReplayManager.playback = false
 				ReplayManager.cut_replay(self.current_tick)

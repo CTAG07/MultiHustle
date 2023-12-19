@@ -18,6 +18,7 @@ func _on_game_playback_requested():
 func _ready():
 	p1_turn_timer.disconnect("timeout", self, "_on_turn_timer_timeout")
 	p2_turn_timer.disconnect("timeout", self, "_on_turn_timer_timeout")
+	Network.disconnect("player_turns_synced", self, "on_player_actionable")
 
 func init(game):
 	game.turns_taken = {}
@@ -86,6 +87,9 @@ func end_turn_for(player_id):
 
 func _on_turn_timer_timeout(player_id):
 	Network.log("Player " + str(player_id) + " timed out")
+	Network.log("RealID 1: " + str(GetRealID(1)))
+	Network.log("RealID 2: " + str(GetRealID(2)))
+	Network.log("Network ID: " + str(Network.player_id))
 	if player_id == Network.player_id:
 		if GetRealID(1) == Network.player_id:
 			$"%P1ActionButtons".timeout()
@@ -128,7 +132,41 @@ func on_player_actionable():
 		else:
 			game.turns_taken[index] = false
 			Network.turns_ready[index] = false
-	.on_player_actionable()
+	if actionable and (Network.multiplayer_active and not Network.undo and not Network.auto):
+		return 
+	while is_instance_valid(game) and not game.game_paused:
+		yield (get_tree(), "idle_frame")
+	Network.undo = false
+	Network.auto = false
+	actionable = true
+	actionable_time = 0
+	if Network.multiplayer_active or SteamLobby.SPECTATING:
+		while not (Network.can_open_action_buttons):
+			yield (get_tree(), "physics_frame")
+		if not game_started:
+			p1_turn_timer.start()
+			p2_turn_timer.start()
+			game_started = true
+		else :
+			if not chess_timer:
+				p1_turn_timer.start(turn_time)
+				p2_turn_timer.start(turn_time)
+			else :
+				if p1_turn_timer.time_left < MIN_TURN_TIME:
+					p1_turn_timer.start(MIN_TURN_TIME)
+				if p2_turn_timer.time_left < MIN_TURN_TIME:
+					p2_turn_timer.start(MIN_TURN_TIME)
+				if is_instance_valid(game):
+					MIN_TURN_TIME = game.match_data.turn_min_length
+		p1_turn_timer.paused = false
+		p2_turn_timer.paused = false
+		$"%P1TurnTimerBar".show()
+		$"%P2TurnTimerBar".show()
+	$"%P1ActionButtons".activate()
+	$"%P2ActionButtons".activate()
+	if is_instance_valid(game):
+		game.is_in_replay = false
+	$"%AdvantageLabel".text = ""
 	if Network.multiplayer_active or SteamLobby.SPECTATING:
 		if not game_started:
 			for timer in turn_timers.values():

@@ -31,6 +31,10 @@ func setup_game_deferred(singleplayer, data):
 
 	Network.game = game
 
+	if !Network.sync_unlocks.keys().has(1):
+		for key in data.selected_characters.keys():
+			Network.sync_unlocks[key] = false
+
 	# This fallback will be removed next major game update
 	var user_data
 	var has_data = true

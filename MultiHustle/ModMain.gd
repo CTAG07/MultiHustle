@@ -24,6 +24,7 @@ func _init(modLoader = ModLoader):
 	installExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
 	installExtension("res://MultiHustle/ui/SteamLobby/SteamLobby.gd")
 	installExtension("res://MultiHustle/ui/UILayer.gd")
+	installExtension("res://MultiHustle/ui/Chat.gd")
 	installExtension("res://MultiHustle/Network.gd")
 	installExtension("res://MultiHustle/game.gd")
 	installExtension("res://MultiHustle/ReplayManager.gd")
