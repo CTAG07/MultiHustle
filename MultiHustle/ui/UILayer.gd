@@ -162,6 +162,8 @@ func on_player_actionable():
 		p2_turn_timer.paused = false
 		$"%P1TurnTimerBar".show()
 		$"%P2TurnTimerBar".show()
+	$"%P1ActionButtons".visible = false
+	$"%P2ActionButtons".visible = false
 	$"%P1ActionButtons".activate()
 	$"%P2ActionButtons".activate()
 	if is_instance_valid(game):

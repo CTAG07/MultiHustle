@@ -18,6 +18,7 @@ func Init(main):
 		if id == 1 && Network.multiplayer_active:
 			charSelect.Init(main, id)
 			charSelect.SelectIndex(Network.player_id)
+			oppSelect.on_ParentChanged()
 			assigned_ids.append(Network.player_id)
 			charSelect.hide()
 		else:
@@ -26,6 +27,7 @@ func Init(main):
 				new_id += 1
 			charSelect.Init(main, id)
 			charSelect.SelectIndex(new_id)
+			oppSelect.on_ParentChanged()
 			assigned_ids.append(new_id)
 	# TODO - Make this more expandable
 	Network.log("Network Player ID: " + str(Network.player_id) + " | Assigned IDs: " + str(assigned_ids))

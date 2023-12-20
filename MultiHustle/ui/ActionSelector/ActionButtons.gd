@@ -5,11 +5,11 @@ extends "res://ui/ActionSelector/ActionButtons.gd"
 var id = null
 
 # Hooked for debugging purposes
-func init(game, pid):
+func init(ngame, pid):
 	id = pid
 	Network.log("Init called for action buttons! ID: " + str(pid))
 	reset()
-	self.game = game
+	game = ngame
 	fighter = game.get_player(pid)
 	$"%DI".visible = fighter.di_enabled
 	fighter_extra = fighter.player_extra_params_scene.instance()
@@ -180,9 +180,12 @@ func update_select_button():
 	if not user_facing:
 		$"%SelectButton".disabled = true
 	else :
-		$"%SelectButton".disabled = game.spectating or locked_in
+		$"%SelectButton".disabled = game.spectating or locked_in or game.get_player(id).game_over
 
 func activate(refresh = true):
+
+	Network.log("Action buttons should be showing: " + str(visible) + " | " + str(active))
+
 	if visible and refresh:
 		Network.log("Returning at point A")
 		return
@@ -288,5 +291,3 @@ func activate(refresh = true):
 			var input = Network.p2_undo_action
 			on_action_submitted(input["action"], input["data"], input["extra"])
 			Network.p2_undo_action = null
-	
-	Network.log("Action buttons should be showing: " + str(visible) + " | " + str(active))
