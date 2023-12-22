@@ -154,7 +154,7 @@ func _read_P2P_Packet():
 		p2p_packet_sender = PACKET_SENDER
 		var PACKET_CODE:PoolByteArray = PACKET["data"]
 		var readable:Dictionary = bytes2var(PACKET_CODE)
-		Network.log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable))
+		Network.log("P2P packet recieved! Sender: " + str(p2p_packet_sender) + " Data: " + str(readable), true)
 		if readable.has("rpc_data"):
 			_receive_rpc(readable)
 		if readable.has("challenge_from"):
@@ -225,5 +225,5 @@ func _read_P2P_Packet():
 		_read_P2P_Packet_custom(readable)
 
 func _send_P2P_Packet(target:int, packet_data:Dictionary)->void :
-	Network.log("Sending P2P packet! Data: " + str(packet_data))
+	Network.log("Sending P2P packet! Data: " + str(packet_data), true)
 	._send_P2P_Packet(target, packet_data)

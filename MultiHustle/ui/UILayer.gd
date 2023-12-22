@@ -110,11 +110,15 @@ func GetRealID(player_id):
 
 #Submits a blank action, used for locking all players in at once and locking in dead players
 func submit_dummy_action(player_id):
-	.end_turn_for(player_id)
-	var fighter = game.get_player(player_id)
-	fighter.on_action_selected("Continue", null, null)
-	game.turns_taken[player_id] = true
-	Network.turns_ready[player_id] = true
+	if Network.multiplayer_active and player_id == Network.player_id:
+		# This solution is questionable, but it should work? This is just to lock in dead players
+		$"P1ActionButtons"._on_submit_pressed()
+	else:
+		.end_turn_for(player_id)
+		var fighter = game.get_player(player_id)
+		fighter.on_action_selected("Continue", null, null)
+		game.turns_taken[player_id] = true
+		Network.turns_ready[player_id] = true
 
 func ContinueAll():
 	if !Network.multiplayer_active:
@@ -162,10 +166,8 @@ func on_player_actionable():
 		p2_turn_timer.paused = false
 		$"%P1TurnTimerBar".show()
 		$"%P2TurnTimerBar".show()
-	$"%P1ActionButtons".visible = false
-	$"%P2ActionButtons".visible = false
-	$"%P1ActionButtons".activate()
-	$"%P2ActionButtons".activate()
+	$"%P1ActionButtons".re_init(GetRealID(1))
+	$"%P2ActionButtons".re_init(GetRealID(2))
 	if is_instance_valid(game):
 		game.is_in_replay = false
 	$"%AdvantageLabel".text = ""

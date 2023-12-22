@@ -10,13 +10,17 @@ var sync_unlocks = {}
 var lock_sync_unlocks = true
 
 #Oh my god I hate this so much but it somehow works in testing dpajwojiosdfnikvkvknovnkonkoiopsja
-var file_path = "user://logs/mhlogs" + Time.get_time_string_from_unix_time(int(Time.get_unix_time_from_system()-(Time.get_ticks_msec()/1000))).replace(":", ".") + ".log"
+var mh_file_path = "user://logs/mhlogs" + Time.get_time_string_from_unix_time(int(Time.get_unix_time_from_system()-(Time.get_ticks_msec()/1000))).replace(":", ".") + ".log"
+var net_file_path = "user://logs/netlogs" + Time.get_time_string_from_unix_time(int(Time.get_unix_time_from_system()-(Time.get_ticks_msec()/1000))).replace(":", ".") + ".log"
 var logger = preload("res://MultiHustle/logger.gd")
 
 # Util Functions
 
-func log(msg):
-	logger.mh_log("[" + str(float(Time.get_ticks_msec())/1000.0) + "] " + msg, file_path)
+func log(msg, net = false):
+	if net:
+		logger.mh_log("[" + str(float(Time.get_ticks_msec())/1000.0) + "] " + msg, net_file_path)
+	else:
+		logger.mh_log("[" + str(float(Time.get_ticks_msec())/1000.0) + "] " + msg, mh_file_path)
 
 func get_all_pairs(list):
 	var idx = 0
@@ -81,21 +85,18 @@ remotesync func multiplayer_turn_ready(id):
 	emit_signal("player_turn_ready", id)
 	if steam:
 		SteamLobby.spectator_turn_ready(id)
-	var ready = true
 	for r in turns_ready.values():
 		if !r:
-			ready = false
-			break
-	if ready:
-		action_submitted = true
-		last_action = action_inputs[player_id]
-		if is_instance_valid(game):
-			last_action_sent_tick = game.current_tick
-		send_current_action()
-		possible_softlock = true
-		emit_signal("turn_ready")
-		turn_synced = false
-		send_ready = true
+			return
+	action_submitted = true
+	last_action = action_inputs[player_id]
+	if is_instance_valid(game):
+		last_action_sent_tick = game.current_tick
+	send_current_action()
+	possible_softlock = true
+	emit_signal("turn_ready")
+	turn_synced = false
+	send_ready = true
 
 func sync_tick():
 	lock_sync_unlocks = false
