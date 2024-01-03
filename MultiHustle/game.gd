@@ -976,7 +976,7 @@ func process_tick():
 
 			for index in players.keys():
 				var player = players[index]
-				if player.state_interruptable and !player_turns[index]:
+				if player.state_interruptable and !player_turns[index] and player.hp > 0:
 					someones_turn = true # Keep an eye on this
 					break
 			if someones_turn:

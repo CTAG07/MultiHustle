@@ -5,6 +5,8 @@ var OPPONENT_IDS = {}
 var is_syncing = false
 var sync_confirms = {}
 
+signal start_game()
+
 func _setup_game_vs(steam_id):
 	print_debug("Normal game setup got called for some reason")
 	host_game_vs_all()
@@ -28,15 +30,11 @@ func host_game_vs_all():
 		else:
 			# I should probably tweak this, but for now it does this
 			Steam.closeP2PSessionWithUser(steam_id)
-	Network.steam_isHost = true
+	Network.multiplayer_host = true
 	#PLAYER_SIDE = 1
 	#multihustle_send_start()
 	# DEBUG Stuff
 	multihustle_send_start()
-	if len(LOBBY_MEMBERS) <= 1:
-		var debug_array = Network.char_mods.duplicate()
-		debug_array.remove(5)
-		multihustle_receive_sync(SteamHustle.STEAM_ID, debug_array)
 
 func _setup_game_vs_group(OPPONENT_IDS):
 	if Network.has_char_loader():
@@ -59,7 +57,7 @@ func _setup_game_vs_group(OPPONENT_IDS):
 			PLAYER_SIDE = index
 			Steam.setLobbyMemberData(SteamLobby.LOBBY_ID, "player_id", str(index))
 			break
-	Network.assign_players_lobby(OPPONENT_IDS)
+	emit_signal("start_game")
 	Steam.setLobbyMemberData(LOBBY_ID, "status", "fighting")
 	Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", str(OPPONENT_ID))
 

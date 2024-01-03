@@ -23,14 +23,14 @@ func _init(modLoader = ModLoader):
 	modLoader.installScriptExtension("res://MultiHustle/ui/ActionSelector/ActionButtons.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/CSS/CharacterSelect.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/HUD/HudLayer.gd")
-	#modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
-	#modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/SteamLobby.gd")
+	modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
+	modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/SteamLobby.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/UILayer.gd")
 	installExtension("res://MultiHustle/Network.gd")
 	modLoader.installScriptExtension("res://MultiHustle/game.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ReplayManager.gd")
 	modLoader.installScriptExtension("res://MultiHustle/main.gd")
-	#modLoader.installScriptExtension("res://MultiHustle/SteamLobby.gd")
+	modLoader.installScriptExtension("res://MultiHustle/SteamLobby.gd")
 
 	#modLoader.saveScene(preload("res://MultiHustle/ui/SteamLobby/LobbyMatch.tscn").instance(), "res://ui/SteamLobby/LobbyMatch.tscn")
 
