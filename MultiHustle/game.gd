@@ -18,7 +18,7 @@ var game_started_real:bool = false
 
 var multiHustle_CharManager
 
-var turns_taken
+var turns_taken = {}
 
 var needs_refresh = true
 
@@ -32,6 +32,7 @@ var color_rng:BetterRng = BetterRng.new()
 # Handled this way to avoid constant resizing, assuming Godot isn't stupid
 var throws_consumed:Dictionary = {}
 
+var network_simulate_readies = {}
 
 func copy_to(game):
 	set_vanilla_game_started(true)
@@ -164,7 +165,7 @@ func start_game(singleplayer:bool, match_data:Dictionary):
 	# Implement variable key loader
 	for index in match_data.selected_characters.keys():
 		if multiHustle_CharManager.InitCharacter(self, index, match_data.selected_characters[index]) == false:
-			print_debug("Failed to load character")
+			Network.log("Failed to load character")
 			return false
 
 	for player in players.values():
@@ -744,9 +745,6 @@ func apply_hitboxes_internal(playerhitboxpair:Array):
 			if not px2.is_grounded() and not p2_hit_by.hits_vs_aerial:
 				can_hit = false
 
-
-
-
 			if can_hit:
 				if throws_consumed[px1] != null:
 					return
@@ -771,9 +769,6 @@ func apply_hitboxes_internal(playerhitboxpair:Array):
 				can_hit = false
 			if not px1.is_grounded() and not p1_hit_by.hits_vs_aerial:
 				can_hit = false
-
-
-
 
 			if can_hit:
 				if throws_consumed[px2] != null:
@@ -802,7 +797,6 @@ func apply_hitboxes_objects(players:Array):
 				continue
 			var can_be_hit_by_melee = object.get("can_be_hit_by_melee")
 
-
 			if p:
 				if p.projectile_invulnerable and object.get("immunity_susceptible"):
 					continue
@@ -824,17 +818,6 @@ func apply_hitboxes_objects(players:Array):
 							throws_consumed[object] = p
 					else:
 						MH_wrapped_hit(obj_hit_by, object)
-
-
-
-
-
-
-
-
-
-
-
 
 			# TODO - Figure this out
 			var opp_objects = []
@@ -875,7 +858,7 @@ func MH_wrapped_hit(hitbox, target):
 		result = hitbox.hit(target)
 		target.opponent = opponentTemp
 	else:
-		print_debug("MultiHustle: Couldn't set opponent for hitbox")
+		Network.log("Couldn't set opponent for hitbox")
 		result = hitbox.hit(target)
 	return result
 
@@ -935,6 +918,11 @@ func process_tick():
 	if self.super_freeze_ticks > 0:
 		return
 
+	self.network_simulate_ready = true
+	for value in self.network_simulate_readies.values():
+		if !value:
+			self.network_simulate_ready = value
+
 	var can_tick = not Global.frame_advance or (self.advance_frame_input)
 	if can_tick:
 		self.advance_frame_input = false
@@ -946,8 +934,6 @@ func process_tick():
 	if ReplayManager.resimulating:
 		ReplayManager.playback = true
 		can_tick = true
-
-
 
 	if not ReplayManager.playback:
 		if not is_waiting_on_player():
@@ -979,35 +965,42 @@ func process_tick():
 				if player.state_interruptable and !player_turns[index] and player.hp > 0:
 					someones_turn = true # Keep an eye on this
 					break
+
 			if someones_turn:
 				for index in players.keys():
 					var player = players[index]
 					if player.state_interruptable and !player_turns[index]:
+						player_actionable = true
 						player.show_you_label()
 						player_turns[index] = true
+						match(index):
+							1:
+								p1_turn = true
+							2:
+								p2_turn = true
 					else:
 						player.busy_interrupt = ( not player.state_interruptable and not (player.current_state().interruptible_on_opponent_turn or player.feinting or negative_on_hit(player)))
 						player.state_interruptable = true
 				if singleplayer:
 					emit_signal("player_actionable")
-
-			if someones_turn:
 				ReplayManager.replaying_ingame = false
 				if Network.multiplayer_active:
 					if self.network_sync_tick != self.current_tick:
 						Network.rpc_("end_turn_simulation", [self.current_tick, Network.player_id])
 						self.network_sync_tick = self.current_tick
+						for key in self.network_simulate_readies.keys():
+							self.network_simulate_readies[key] = false
 						self.network_simulate_ready = false
 						Network.sync_unlock_turn()
 						Network.on_turn_started()
 
-	else :
+	else:
 		if ReplayManager.resimulating:
 			self.snapping_camera = true
 			call_deferred("resimulate")
 			yield (get_tree(), "idle_frame")
 			self.game_paused = false
-		else :
+		else:
 			if self.buffer_edit:
 				ReplayManager.playback = false
 				ReplayManager.cut_replay(self.current_tick)

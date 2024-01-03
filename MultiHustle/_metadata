@@ -1,5 +1,5 @@
 {
-  "author": "uGuardian",
+  "author": "uGuardian (Online by CTAG07)",
   "client_side": false,
   "description": "Allows for more than 2 players",
   "friendly_name": "MultiHustle",
@@ -11,5 +11,5 @@
   "requires": [
     ""
   ],
-  "version": "0.6.0"
+  "version": "0.7.0"
 }
