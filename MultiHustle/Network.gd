@@ -16,6 +16,13 @@ var logger = preload("res://MultiHustle/logger.gd")
 
 # Util Functions
 
+"""
+Quick note from CTAG: I use a lot of questionable logic to sorta ignore dead players while still sending them actions.
+Dead players could get desynced and nobody would be the wiser besides the dead player.
+If someone comes along who wants to fix this and make it properly ignore/remove/make them spectators, go ahead.
+But I'm fairly confident that this should cover for now.
+"""
+
 func log(msg, net = false):
 	if net:
 		logger.mh_log("[" + str(float(Time.get_ticks_msec())/1000.0) + "] " + msg, net_file_path)
@@ -100,9 +107,9 @@ remotesync func multiplayer_turn_ready(id):
 
 func sync_tick():
 	lock_sync_unlocks = false
-	Network.log("Telling opponent im ready")
-	rpc_("mh_opponent_tick", player_id, "remote")
-	pass
+	if not game.players[Network.player_id].game_over:
+		Network.log("Telling opponent im ready")
+		rpc_("mh_opponent_tick", player_id, "remote")
 
 remote func mh_opponent_tick(id):
 	Network.log("Opponent is ready")
@@ -114,12 +121,20 @@ func reset_action_inputs():
 	turns_ready = {}
 	action_inputs = {}
 	for player in game.players.keys():
-		action_inputs[player] = {
-			"action":null, 
-			"data":null, 
-			"extra":null, 
-		}
-		turns_ready[player] = false
+		if game.players[player].game_over:
+			action_inputs[player] = {
+				"action":"ContinueAuto", 
+				"data":null, 
+				"extra":null, 
+			}
+			turns_ready[player] = true
+		else:
+			action_inputs[player] = {
+				"action":null, 
+				"data":null, 
+				"extra":null, 
+			}
+			turns_ready[player] = false
 
 func sync_unlock_turn():
 	Network.log("telling opponent we are actionable")
@@ -146,7 +161,8 @@ remote func mh_opponent_sync_unlock(id):
 				break
 		if done:
 			for key in sync_unlocks.keys():
-				sync_unlocks[key] = false
+				if not game.players[key].game_over:
+					sync_unlocks[key] = false
 			can_open_action_buttons = true
 			Network.log("Unlocking action buttons")
 			emit_signal("force_open_action_buttons")

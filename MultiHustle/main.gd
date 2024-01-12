@@ -71,9 +71,13 @@ func setup_game_deferred(singleplayer, data):
 			ui_layer.set_turn_time(data.turn_time, (data.has("chess_timer") and data.chess_timer))
 		else :
 			ui_layer.start_timers()
-	MultiHustle_AddData()
-	ui_layer.init(game)
+	var uiselectors = MultiHustle_AddData()
+	ui_layer.init(self)
 	hud_layer.init(game)
+	#Dumb patchwork fix so that the ui accurately shows who's selected when in multiplayer.
+	for id in uiselectors.selects.keys():
+		var charSelect = uiselectors.selects[id][0]
+		charSelect.InitUI(charSelect.get_activeChar().id)
 	var p1 = game.get_player(1)
 	var p2 = game.get_player(2)
 	p1.debug_label = $"%DebugLabelP1"
@@ -202,6 +206,7 @@ func MultiHustle_AddData():
 	ui_layer.add_child(uiselectors)
 	ui_layer.multiHustle_UISelectors = uiselectors
 	uiselectors.Init(self)
+	return uiselectors
 
 func fix_ghost_objects(ghost_game_):
 	var to_remove = []

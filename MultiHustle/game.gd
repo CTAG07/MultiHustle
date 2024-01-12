@@ -335,11 +335,6 @@ func update_data():
 				p2_data = player.data
 
 func get_max_replay_tick():
-
-
-
-
-
 	max_replay_tick = 0
 	for id in ReplayManager.frame_ids():
 		for tick in ReplayManager.frames[id].keys():
@@ -989,7 +984,8 @@ func process_tick():
 						Network.rpc_("end_turn_simulation", [self.current_tick, Network.player_id])
 						self.network_sync_tick = self.current_tick
 						for key in self.network_simulate_readies.keys():
-							self.network_simulate_readies[key] = false
+							if not self.players[key].game_over:
+								self.network_simulate_readies[key] = false
 						self.network_simulate_ready = false
 						Network.sync_unlock_turn()
 						Network.on_turn_started()

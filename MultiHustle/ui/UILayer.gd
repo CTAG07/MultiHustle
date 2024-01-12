@@ -3,7 +3,7 @@ extends "res://ui/UILayer.gd"
 var multiHustle_UISelectors
 var spacebar_handler
 
-
+var main
 
 var turn_timers = {}
 
@@ -20,7 +20,9 @@ func _ready():
 	p2_turn_timer.disconnect("timeout", self, "_on_turn_timer_timeout")
 	Network.disconnect("player_turns_synced", self, "on_player_actionable")
 
-func init(game):
+func init(m):
+	self.main = m
+	game = m.game
 	game.turns_taken = {}
 	for index in game.players.keys():
 		game.turns_taken[index] = false
@@ -87,9 +89,6 @@ func end_turn_for(player_id):
 
 func _on_turn_timer_timeout(player_id):
 	Network.log("Player " + str(player_id) + " timed out")
-	Network.log("RealID 1: " + str(GetRealID(1)))
-	Network.log("RealID 2: " + str(GetRealID(2)))
-	Network.log("Network ID: " + str(Network.player_id))
 	if player_id == Network.player_id:
 		if GetRealID(1) == Network.player_id:
 			$"%P1ActionButtons".timeout()
@@ -109,14 +108,14 @@ func GetRealID(player_id):
 	return multiHustle_UISelectors.selects[player_id][0].activeCharIndex
 
 #Submits a blank action, used for locking all players in at once and locking in dead players
-func submit_dummy_action(player_id):
+func submit_dummy_action(player_id, action = "Continue", data = null, extras = null):
 	if Network.multiplayer_active and player_id == Network.player_id:
-		# This solution is questionable, but it should work? This is just to lock in dead players
+		# This solution is questionable, but it should work? This is just to lock in automatically when the local player is dead
 		$"P1ActionButtons"._on_submit_pressed()
 	else:
 		.end_turn_for(player_id)
 		var fighter = game.get_player(player_id)
-		fighter.on_action_selected("Continue", null, null)
+		fighter.on_action_selected(action, data, extras)
 		game.turns_taken[player_id] = true
 		Network.turns_ready[player_id] = true
 
@@ -124,7 +123,10 @@ func ContinueAll():
 	if !Network.multiplayer_active:
 		for index in game.players.keys():
 			if game.turns_taken[index] == false:
-				submit_dummy_action(index)
+				if self.main.player_ghost_actions.has(index):
+					submit_dummy_action(index, self.main.player_ghost_actions[index], self.main.player_ghost_datas[index], self.main.player_ghost_extras[index])
+				else:
+					submit_dummy_action(index)
 
 func on_player_actionable():
 	Network.action_submitted = false
@@ -132,7 +134,7 @@ func on_player_actionable():
 	for index in game.players.keys():
 		var player = game.players[index]
 		if player.game_over:
-			submit_dummy_action(index)
+			submit_dummy_action(index, "ContinueAuto")
 		else:
 			game.turns_taken[index] = false
 			Network.turns_ready[index] = false
@@ -171,26 +173,23 @@ func on_player_actionable():
 	if is_instance_valid(game):
 		game.is_in_replay = false
 	$"%AdvantageLabel".text = ""
-	if Network.multiplayer_active or SteamLobby.SPECTATING:
-		if not game_started:
+	if Network.multiplayer_active:
+		if not chess_timer:
 			for timer in turn_timers.values():
-				timer.start()
+				timer.start(turn_time)
 		else :
-			if not chess_timer:
-				for timer in turn_timers.values():
-					timer.start(turn_time)
-			else :
-				for timer in turn_timers.values():
-					if timer.time_left < MIN_TURN_TIME:
-						timer.start(MIN_TURN_TIME)
+			for timer in turn_timers.values():
+				if timer.time_left < MIN_TURN_TIME:
+					timer.start(MIN_TURN_TIME)
 		for timer in turn_timers.values():
 			timer.paused = false
 	
 
 func start_timers():
 	.start_timers()
-	for timer in turn_timers.values():
-		timer.paused = false
+	if actionable:
+		for timer in turn_timers.values():
+			timer.paused = false
 
 func set_turn_time(time, minutes = false):
 	.set_turn_time(time, minutes)

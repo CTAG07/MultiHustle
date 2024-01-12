@@ -16,6 +16,7 @@ func Init(main):
 		oppSelect.parent = charSelect
 		charSelect.opponentSelect = oppSelect
 		if id == 1 && Network.multiplayer_active:
+			# I don't like the number of things I'm doing here, a better way is probably most certainly possible.
 			charSelect.Init(main, id)
 			charSelect.SelectIndex(Network.player_id)
 			oppSelect.on_ParentChanged()
@@ -25,6 +26,7 @@ func Init(main):
 			var new_id = 1
 			while assigned_ids.has(new_id):
 				new_id += 1
+			# This too. I hate this.
 			charSelect.Init(main, id)
 			charSelect.SelectIndex(new_id)
 			oppSelect.on_ParentChanged()
