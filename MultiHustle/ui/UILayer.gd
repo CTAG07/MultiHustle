@@ -195,3 +195,9 @@ func set_turn_time(time, minutes = false):
 	.set_turn_time(time, minutes)
 	for timer in turn_timers.values():
 		timer.wait_time = time * (60 if minutes else 1)
+
+func _on_SoftlockResetButton_pressed():
+	main.ui_layer.p1_action_buttons.re_init(GetRealID(1))
+	main.ui_layer.p2_action_buttons.re_init(GetRealID(2))
+	main.hud_layer.initp1(GetRealID(1))
+	main.hud_layer.initp2(GetRealID(2))

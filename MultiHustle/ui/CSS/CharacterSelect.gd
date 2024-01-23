@@ -23,8 +23,6 @@ func _on_network_character_selected(player_id, character, style = null):
 	if Network.is_host():
 		var match_data = get_match_data()
 		Network.rpc_("send_match_data", match_data)
-		if Network.steam:
-			Network.send_match_data(match_data)
 
 func init(singleplayer = true):
 	.init(singleplayer)
