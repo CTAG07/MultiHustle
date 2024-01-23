@@ -5,7 +5,7 @@ All credit for original mod idea and code goes to uGuardian
 
 CURRENT GOAL:
 
-- Fixed action selectors, time to get some proper testing done?
+- Fix up a couple more things for multiplayer before an actual release on steam
 
 Planned changes
 - [x] Make it not crash when pressing start
@@ -16,15 +16,16 @@ Planned changes
 - [x] Make sending moves work
 - [x] Make syncing things (such as timer) work
 - [x] Lock p1 to left side of screen
-- [ ] Fix any bugs that come from online
-- [ ] Fix any bugs in base multiplayer
+- [ ] Fix my weird timer implementation
+- [ ] Handle disconnects and forefits well (i spelt that wrong)
+- [ ] Make spectating work
+- [ ] Some big desync fix
+- [ ] Fix some bugs from the base multihustle (people wont stop asking about grabs)
 - [ ] Custom characters support
-- [ ] Fix custom character replays
 
 Extra changes (Possibilities after planned changes are done)
-- [ ] Teams in singleplayer
-- [ ] Teams in multiplayer
-- [ ] Targeting rework
+- [ ] Teams in singleplayer/multiplayer
+- [ ] Targeting rework (to fix grabs?)
 - [ ] Mod compatibility
 - [x] /em support
 - [ ] Anything else wanted
