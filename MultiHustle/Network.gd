@@ -167,3 +167,18 @@ remote func mh_opponent_sync_unlock(id):
 			Network.log("Unlocking action buttons")
 			emit_signal("force_open_action_buttons")
 			lock_sync_unlocks = true
+
+remote func player_disconnected(id):
+	if not (id in players):
+		return 
+	if Global.css_open:
+		if steam and game.players[id].hp > 0:
+			game.players[id].forfeit()
+	emit_signal("player_disconnected")
+	if is_host():
+		if players.has(id):
+			emit_signal("game_error", "Player " + players[id] + " disconnected")
+	else:
+		unregister_player(id)
+	if not steam:
+		end_game()

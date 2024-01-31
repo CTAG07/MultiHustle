@@ -132,9 +132,7 @@ func on_hitbox_refreshed(hitbox_name):
 
 func forfeit(id):
 	set_vanilla_game_started(true)
-
-	# TODO - Make this work with multiple players
-	.forfeit(id)
+	players[id].forfeit()
 
 func MultiHustle_get_color_by_index(index):
 	# TODO - Add more auto-colors
@@ -456,6 +454,8 @@ func tick():
 	for player in players.values():
 		if player.hp <= 0:
 			player.game_over = true
+		else:
+			player.game_over = false
 
 func resolve_port_priority():
 	set_vanilla_game_started(true)
@@ -516,7 +516,7 @@ func should_game_end():
 
 	var liveCount = len(players)
 	for player in players.values():
-		liveCount -= int((player.hp <= 0))
+		liveCount -= int(player.game_over)
 	return (self.current_tick > self.time or liveCount <= 1)
 
 func get_all_pairs(list):
