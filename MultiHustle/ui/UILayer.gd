@@ -3,6 +3,8 @@ extends "res://ui/UILayer.gd"
 var multiHustle_UISelectors
 var spacebar_handler
 
+var player_time_run_out:Dictionary = {}
+
 var main
 
 var turn_timers = {}
@@ -26,6 +28,8 @@ func init(m):
 	game.turns_taken = {}
 	for index in game.players.keys():
 		game.turns_taken[index] = false
+		# TODO - Implement this
+		player_time_run_out[index] = false
 	.init(game)
 	turn_timers = {}
 	for index in game.players.keys():
