@@ -23,7 +23,7 @@ func _init(modLoader = ModLoader):
 	modLoader.installScriptExtension("res://MultiHustle/ui/ActionSelector/ActionButtons.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/CSS/CharacterSelect.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/HUD/HudLayer.gd")
-	#modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
+	modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/LobbyUser.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/SteamLobby/SteamLobby.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/UILayer.gd")
 	modLoader.installScriptExtension("res://MultiHustle/ui/Chat.gd")
