@@ -101,7 +101,7 @@ func _setup_game_vs_group(OPPONENT_IDS):
 	Network.network_ids = OPPONENT_IDS
 	if SteamHustle.STEAM_ID == LOBBY_OWNER:
 		rpc_("open_chara_select")
-		Network.callv("open_chara_select", null)
+		Network.callv("open_chara_select", [])
 	Steam.setLobbyMemberData(LOBBY_ID, "status", "fighting")
 	Steam.setLobbyMemberData(LOBBY_ID, "opponent_id", str(OPPONENT_ID))
 

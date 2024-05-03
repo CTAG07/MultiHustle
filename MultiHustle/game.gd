@@ -486,7 +486,7 @@ func resolve_port_priority(id = false):
 			var p2 = players[index2]
 			var p1_state = p1.current_state()
 			var p2_state = p2.current_state()
-			priority = p.call_func(p1_state, p2_state)
+			var priority = p.call_func(p1_state, p2_state)
 			match priority:
 				1:
 					if !playerAdded[index1]:
